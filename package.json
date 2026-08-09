@@ -1,0 +1,33 @@
+{
+  "name": "love-personality-test",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.55.0",
+    "next": "^15.4.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.0.17"
+  },
+  "devDependencies": {
+    "@types/node": "^22.17.1",
+    "@types/qrcode": "^1.5.5",
+    "@eslint/eslintrc": "^3.3.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "eslint": "^9.33.0",
+    "eslint-config-next": "^15.4.6",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

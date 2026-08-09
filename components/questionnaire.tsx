@@ -1,0 +1,52 @@
+"use client";
+
+import type { AnswerValue, Question } from "@/lib/types";
+
+export function Questionnaire({
+  questions,
+  current,
+  answers,
+  moving,
+  error,
+  label,
+  onSelect,
+  onBack,
+  children,
+}: {
+  questions: Question[];
+  current: number;
+  answers: Array<AnswerValue | null>;
+  moving: boolean;
+  error: string;
+  label: string;
+  onSelect: (value: AnswerValue) => void;
+  onBack: () => void;
+  children?: React.ReactNode;
+}) {
+  const question = questions[current];
+  return (
+    <main className="app-shell test-page page-padding">
+      <header>
+        <div className="test-head"><p className="eyebrow">{label}</p><span className="type-number">{String(current + 1).padStart(2, "0")} / {String(questions.length).padStart(2, "0")}</span></div>
+        <div className="progress-track"><div className="progress-fill" style={{ width: `${((current + 1) / questions.length) * 100}%` }} /></div>
+      </header>
+      <section className="question-stage" key={question.id}>
+        <p className="question-number">第 {String(current + 1).padStart(2, "0")} 题</p>
+        <h1 className="question-title">{question.prompt}</h1>
+        <div className="options">
+          {question.options.map((option, index) => (
+            <button key={option.value} className={`option-button ${answers[current] === option.value ? "selected" : ""}`} onClick={() => onSelect(option.value)} disabled={moving}>
+              <span>{String.fromCharCode(65 + index)}</span><span>{option.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className="error-text" role="alert">{error}</p>
+      </section>
+      <footer className="test-footer">
+        <button className="text-button" onClick={onBack} disabled={current === 0}>← 返回上一题</button>
+        <span className="eyebrow">凭第一直觉选择</span>
+      </footer>
+      {children}
+    </main>
+  );
+}
