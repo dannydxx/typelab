@@ -6,6 +6,7 @@ import { QUESTIONS } from "@/lib/questions";
 import { STORAGE_KEYS } from "@/lib/config";
 import type { AnswerValue } from "@/lib/types";
 import { Questionnaire } from "./questionnaire";
+import { getUserFacingError } from "@/lib/user-facing-error";
 
 type Progress = { current: number; answers: Array<AnswerValue | null> };
 const emptyProgress = (): Progress => ({ current: 0, answers: Array(20).fill(null) });
@@ -70,7 +71,7 @@ export function TestExperience() {
       localStorage.removeItem(STORAGE_KEYS.progress);
       router.replace("/premium/result?reveal=1");
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "网络好像开了个小差，请稍后再试。");
+      setError(getUserFacingError(cause, "网络好像开了个小差，请稍后再试。"));
       setMoving(false);
     }
   }

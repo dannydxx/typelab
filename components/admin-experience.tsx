@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PERSONALITY_BY_ID } from "@/lib/personalities";
+import { getUserFacingError } from "@/lib/user-facing-error";
 
 type Summary = {
   codes: { total: number; unused: number; active: number; expired: number; disabled: number };
@@ -51,7 +52,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
       const response = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, password }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.message);
       setAuthenticated(true); setPassword("");
-    } catch (cause) { setMessage(cause instanceof Error ? cause.message : "登录失败，请稍后再试。"); }
+    } catch (cause) { setMessage(getUserFacingError(cause, "登录失败，请稍后再试。")); }
     finally { setBusy(false); }
   }
 
@@ -63,7 +64,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
       const response = await fetch("/api/admin/codes/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ count }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.message);
       setMessage(`成功生成 ${data.count} 个兑换码，批次 ${data.batchId}。`); await loadSummary();
-    } catch (cause) { setMessage(cause instanceof Error ? cause.message : "生成失败，请稍后再试。"); }
+    } catch (cause) { setMessage(getUserFacingError(cause, "生成失败，请稍后再试。")); }
     finally { setBusy(false); }
   }
 
@@ -72,7 +73,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
     try {
       const response = await fetch(`/api/admin/codes?code=${encodeURIComponent(search)}`);
       const data = await response.json(); if (!response.ok) throw new Error(data.message); setFoundCode(data.code);
-    } catch (cause) { setFoundCode(null); setMessage(cause instanceof Error ? cause.message : "查询失败。"); }
+    } catch (cause) { setFoundCode(null); setMessage(getUserFacingError(cause, "查询失败。")); }
     finally { setBusy(false); }
   }
 
@@ -82,7 +83,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
       const response = await fetch("/api/admin/codes", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: foundCode.code, action, hours: 24 }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.message);
       setMessage("兑换码状态已更新。"); setSearch(foundCode.code); await findCode({ preventDefault() {} } as React.FormEvent); await loadSummary();
-    } catch (cause) { setMessage(cause instanceof Error ? cause.message : "更新失败。"); }
+    } catch (cause) { setMessage(getUserFacingError(cause, "更新失败。")); }
     finally { setBusy(false); }
   }
 

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { LOCAL_DEMO_CODE, STORAGE_KEYS } from "@/lib/config";
 import type { StoredResult } from "@/lib/types";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
+import { getUserFacingError } from "@/lib/user-facing-error";
 
 type RedeemPayload = {
   ok: boolean;
@@ -52,7 +53,7 @@ export function HomeExperience() {
       setHasSession(false);
       setShowRedeem(true);
       setCode(storedCode);
-      setError(cause instanceof Error ? cause.message : "兑换会话已失效，请重新输入兑换码。");
+      setError(getUserFacingError(cause, "兑换会话已失效，请重新输入兑换码。"));
     } finally { setBusy(false); }
   }
 
@@ -78,7 +79,7 @@ export function HomeExperience() {
       else await startAttempt(data.sessionToken);
     } catch (cause) {
       setRedeemed(false);
-      setError(cause instanceof Error ? cause.message : "网络好像开了个小差，请稍后再试。");
+      setError(getUserFacingError(cause, "网络好像开了个小差，请稍后再试。"));
     } finally { setBusy(false); }
   }
 

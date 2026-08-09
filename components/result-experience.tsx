@@ -10,6 +10,7 @@ import { ResultReveal } from "./result-reveal";
 import { normalizeStoredResult } from "@/lib/personality-compat";
 import { ResultDetailPage } from "./result-detail/result-detail-page";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
+import { getUserFacingError } from "@/lib/user-facing-error";
 
 function previewScoresFor(personality: Personality): DimensionScores {
   return {
@@ -97,7 +98,7 @@ export function ResultExperience() {
       await startPremiumAttempt(sessionToken);
       router.push("/premium/test");
     } catch (cause) {
-      setActionMessage(cause instanceof Error ? cause.message : "暂时无法开始测试，请稍后再试。");
+      setActionMessage(getUserFacingError(cause, "暂时无法开始测试，请稍后再试。"));
     } finally {
       setRetestBusy(false);
     }
