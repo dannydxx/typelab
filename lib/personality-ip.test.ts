@@ -58,4 +58,30 @@ describe("formal personality IP system", () => {
       "12", "13", "14", "15", "16",
     ]);
   });
+
+  it("keeps the TYPE 10 V2 sample complete and mobile-readable", () => {
+    const sample = PERSONALITIES.find((item) => item.id === "10")?.v2;
+    expect(sample).toBeDefined();
+    if (!sample) return;
+
+    expect(sample.summary.metrics).toHaveLength(3);
+    expect(sample.relationshipPosition.map((item) => item.key)).toEqual(["security", "closeness", "expression", "conflict"]);
+    expect(sample.boundaries.items).toHaveLength(3);
+    expect(sample.innerOS).toHaveLength(2);
+    expect(sample.advice).toHaveLength(3);
+    expect(sample.summary.metrics.every((metric) => metric.value >= 0 && metric.value <= 100)).toBe(true);
+
+    const prose = [
+      sample.summary.description, sample.base.description, sample.heart.description, sample.safety.description,
+      sample.boundaries.intro, ...sample.boundaries.items.map((item) => item.description),
+      sample.attraction.description, sample.attraction.hiddenAttraction, sample.needs.description,
+      ...sample.needs.needs, ...sample.innerOS.flatMap((item) => [item.outer, item.inner]),
+      ...sample.advice.flatMap((item) => [item.explanation, item.dontSay, item.trySay]),
+    ];
+    const chineseLength = (value: string) => value.match(/[\u3400-\u9fff]/g)?.length ?? 0;
+    expect(Math.max(...prose.map(chineseLength))).toBeLessThanOrEqual(150);
+    const total = prose.reduce((sum, value) => sum + chineseLength(value), 0);
+    expect(total).toBeGreaterThanOrEqual(900);
+    expect(total).toBeLessThanOrEqual(1400);
+  });
 });

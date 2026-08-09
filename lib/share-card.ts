@@ -66,7 +66,7 @@ export async function createShareCard(personality: Personality, result: StoredRe
     ctx.fillStyle = personality.primaryColor; ctx.beginPath(); ctx.arc(x + 100 + scoreToPercent(score) * 3.2, y - 6, 8, 0, Math.PI * 2); ctx.fill();
   });
 
-  ctx.fillStyle = "#242321"; ctx.font = '22px "Songti SC", serif'; ctx.fillText("有些人越喜欢越主动，有些人越喜欢反而越安静。", 70, 1372);
+  ctx.fillStyle = "#242321"; ctx.font = '22px "Songti SC", serif'; ctx.fillText(personality.v2?.share.quote ?? "有些人越喜欢越主动，有些人越喜欢反而越安静。", 70, 1372);
   ctx.textAlign = "right"; ctx.fillStyle = "#77736c"; ctx.font = '17px -apple-system, "PingFang SC", sans-serif'; ctx.fillText(`${PRODUCT_CONFIG.brandName}  ·  ${PRODUCT_CONFIG.xhsAccount}`, 1010, 1372);
 
   if (PRODUCT_CONFIG.showQrCode) {
