@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LOCAL_DEMO_CODE, STORAGE_KEYS } from "@/lib/config";
 import type { StoredResult } from "@/lib/types";
+import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 
 type RedeemPayload = {
   ok: boolean;
@@ -27,11 +28,7 @@ export function HomeExperience() {
   useEffect(() => setHasSession(Boolean(localStorage.getItem(STORAGE_KEYS.session))), []);
 
   async function startAttempt(sessionToken: string) {
-    const response = await fetch("/api/attempts/start", { method: "POST", headers: { "x-redeem-session": sessionToken } });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "暂时无法开始测试，请稍后再试。");
-    localStorage.setItem(STORAGE_KEYS.attemptId, data.attemptId);
-    localStorage.removeItem(STORAGE_KEYS.progress);
+    await startPremiumAttempt(sessionToken);
     router.push("/premium/test");
   }
 
@@ -87,7 +84,7 @@ export function HomeExperience() {
 
   return (
     <main className="app-shell landing page-padding">
-      <nav className="landing-nav"><p className="eyebrow">16型恋爱人格测试</p><span className="landing-index">PREMIUM</span></nav>
+      <nav className="landing-nav"><p className="eyebrow">16型恋爱人格测试</p><span className="landing-index">付费完整版</span></nav>
       <section className="hero">
         <p className="eyebrow">你的完整恋爱人格档案</p>
         <h1>16型<br />恋爱人格测试</h1>
@@ -105,7 +102,7 @@ export function HomeExperience() {
           <form className="redeem-panel" onSubmit={redeem}>
             <label htmlFor="redeem-code">请输入你购买后获得的专属兑换码</label>
             {process.env.NODE_ENV === "development" && <p className="demo-code-note">本地验收码：<button type="button" onClick={() => setCode(LOCAL_DEMO_CODE)}>{LOCAL_DEMO_CODE}</button></p>}
-            <input id="redeem-code" className="code-input" value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="LOVE-XXXX-XXXX" autoCapitalize="characters" autoComplete="off" maxLength={14} required />
+            <input id="redeem-code" className="code-input" value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="请输入兑换码" autoCapitalize="characters" autoComplete="off" maxLength={14} required />
             <button className="primary-button" type="submit" disabled={busy || redeemed}>{redeemed ? "兑换成功 · 正在开启测试…" : busy ? "正在验证…" : "验证并开始测试"}</button>
             <p className="error-text" role="alert">{error}</p>
           </form>

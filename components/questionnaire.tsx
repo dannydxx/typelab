@@ -36,7 +36,7 @@ export function Questionnaire({
         <div className="options">
           {question.options.map((option, index) => (
             <button key={option.value} className={`option-button ${answers[current] === option.value ? "selected" : ""}`} onClick={() => onSelect(option.value)} disabled={moving}>
-              <span>{String.fromCharCode(65 + index)}</span><span>{option.label}</span>
+              <span>{["一", "二", "三", "四"][index]}</span><span>{option.label}</span>
             </button>
           ))}
         </div>

@@ -155,10 +155,10 @@ export const PERSONALITIES: Personality[] = [
         ],
       },
       relationshipPosition: [
-        { key: "security", label: "安全感", en: "SECURITY", left: "稳定", right: "敏感", interpretation: "你会特别留意互动温度是否突然下降。真正触发你的往往不是晚回本身，而是变化没有解释。" },
-        { key: "closeness", label: "亲密节奏", en: "CLOSENESS", left: "独立", right: "靠近", interpretation: "心动后你很自然地增加分享和见面频率；对方有来有回，你的热情就会持续生长。" },
-        { key: "expression", label: "表达方式", en: "EXPRESSION", left: "克制", right: "直接", interpretation: "喜欢、开心和不满都容易被看见。你的表达真实迅速，但有时比完整想法更早抵达。" },
-        { key: "conflict", label: "冲突处理", en: "CONFLICT", left: "冷静", right: "解决", interpretation: "争执发生时，你需要先让情绪落地。短暂停顿后再谈，比当场追问更容易得到你的真实答案。" },
+        { key: "security", label: "安全感", left: "稳定", right: "敏感", interpretation: "你会特别留意互动温度是否突然下降。真正触发你的往往不是晚回本身，而是变化没有解释。" },
+        { key: "closeness", label: "亲密节奏", left: "独立", right: "靠近", interpretation: "心动后你很自然地增加分享和见面频率；对方有来有回，你的热情就会持续生长。" },
+        { key: "expression", label: "表达方式", left: "克制", right: "直接", interpretation: "喜欢、开心和不满都容易被看见。你的表达真实迅速，但有时比完整想法更早抵达。" },
+        { key: "conflict", label: "冲突处理", left: "冷静", right: "解决", interpretation: "争执发生时，你需要先让情绪落地。短暂停顿后再谈，比当场追问更容易得到你的真实答案。" },
       ],
       base: {
         headline: "你不是靠推理进入爱情，而是先被一个鲜活瞬间击中。",

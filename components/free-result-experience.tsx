@@ -37,7 +37,7 @@ export function FreeResultExperience() {
 
   return (
     <main className="app-shell free-result-page page-padding" style={{ "--personality": personality.primaryColor } as React.CSSProperties}>
-      <header className="result-top"><p className="eyebrow">免费人格速写</p><span className="type-number">TYPE {personality.id}</span></header>
+      <header className="result-top"><p className="eyebrow">免费人格速写</p><span className="type-number">{personality.id}号人格</span></header>
       <section className="free-result-intro">
         <PersonalityVisual personality={personality} className="free-result-visual" />
         <p className="eyebrow">你的初步恋爱人格倾向</p>
@@ -47,7 +47,7 @@ export function FreeResultExperience() {
         <p className="free-result-note">这是基于8道精选题得到的初步倾向。完整测试会用20个恋爱场景重新校准四个维度，结果可能发生变化。</p>
       </section>
       <section className="free-unlock-panel">
-        <p className="eyebrow">PREMIUM · 完整档案</p>
+        <p className="eyebrow">付费完整版 · 完整档案</p>
         <h2>你在爱里真正需要的，<br />不止一个名字。</h2>
         <p>解锁完整恋爱人格档案，查看四维坐标、关系底色、隐藏需求、恋爱雷区与专属建议。</p>
         <Link className="primary-button free-cta" href="/free/unlock">解锁完整恋爱人格档案</Link>

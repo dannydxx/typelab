@@ -40,7 +40,6 @@ export interface PersonalityMetric {
 export interface RelationshipPositionDefinition {
   key: Dimension;
   label: string;
-  en: string;
   left: string;
   right: string;
   interpretation: string;

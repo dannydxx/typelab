@@ -81,7 +81,7 @@ export function TestExperience() {
       {resumePrompt && (
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resume-title">
           <div className="modal">
-            <p className="eyebrow">Unfinished portrait</p><h2 id="resume-title">检测到上次未完成的测试</h2>
+            <p className="eyebrow">未完成的测试</p><h2 id="resume-title">检测到上次未完成的测试</h2>
             <p>你已经回答了部分问题，可以从离开的地方继续。</p>
             <div className="modal-actions">
               <button className="primary-button" onClick={() => setResumePrompt(false)}>继续测试</button>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { PRODUCT_CONFIG } from "@/lib/config";
 
-const features = ["20道完整测试", "16型人格精准解析", "专属AI人格卡", "完整关系分析", "高清分享海报"];
+const features = ["20道完整测试", "16型人格精准解析", "专属人格卡", "完整关系分析", "高清分享海报"];
 
 export function PurchaseGuide() {
   return (

@@ -47,6 +47,8 @@ npm run dev
 
 两者共享 [`lib/questions.ts`](lib/questions.ts)、[`lib/personalities.ts`](lib/personalities.ts)、评分逻辑、人格图片与通用组件。免费题目只在 [`lib/free-questions.ts`](lib/free-questions.ts) 中按题号选择，不复制题目文案。
 
+付费结果页提供“再测一次”和“返回完整版首页”两个出口。“再测一次”会先验证兑换会话与剩余次数，成功创建新测试后才清空答题进度并进入第1题；创建失败时保留当前结果页并显示原因。
+
 功能开关位于 [`lib/config.ts`](lib/config.ts)：
 
 ```ts
@@ -113,11 +115,11 @@ values ('这里替换为管理员用户UUID');
 
 字符池排除了 `O、0、I、1、L`，数据库对 `code` 设置了 unique 约束。
 
-## 8. 导出 CSV 并导入自动发货工具
+## 8. 导出表格并导入自动发货工具
 
 后台提供两种导出：
 
-- “导出 CSV”：只有 `code` 一列。
+- “导出表格”：下载的 CSV 文件只有 `code` 一列。
 - “导出带商品名”：包含 `code,product` 两列。
 
 导出只会写入 `exported_at`，不会把卡密标记成已使用。把下载的 CSV 导入你的小红书第三方虚拟商品自动发货工具，并配置固定测试网址即可。本网站不需要连接小红书订单 API。

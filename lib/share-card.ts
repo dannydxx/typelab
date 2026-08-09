@@ -42,7 +42,7 @@ export async function createShareCard(personality: Personality, result: StoredRe
   }
 
   ctx.fillStyle = "rgba(23,23,22,.76)"; ctx.fillRect(70, 72, 940, 60);
-  ctx.fillStyle = "#f8f5ee"; ctx.textAlign = "left"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "4px"; ctx.fillText("RELATIONSHIP PERSONALITY · TYPE " + personality.id, 102, 111);
+  ctx.fillStyle = "#f8f5ee"; ctx.textAlign = "left"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "4px"; ctx.fillText(`16型恋爱人格测试 · ${personality.id}号人格`, 102, 111);
 
   ctx.fillStyle = "#77736c"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("我的恋爱人格", 72, 898);
   ctx.fillStyle = "#242321"; ctx.font = '76px "Songti SC", serif'; ctx.letterSpacing = "5px"; ctx.fillText(personality.name, 68, 995);

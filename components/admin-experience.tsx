@@ -15,6 +15,13 @@ type CodeRecord = {
   completed_count: number; max_completed_count: number; batch_id: string; exported_at: string | null;
 };
 
+const CODE_STATUS_LABELS: Record<string, string> = {
+  unused: "未使用",
+  active: "已激活",
+  expired: "已过期",
+  disabled: "已禁用",
+};
+
 export function AdminExperience({ initialAuthenticated }: { initialAuthenticated: boolean }) {
   const [authenticated, setAuthenticated] = useState(initialAuthenticated);
   const [email, setEmail] = useState("");
@@ -99,15 +106,15 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
           <div className="admin-section-head"><div><p className="eyebrow">兑换码批次</p><h2>生成与导出</h2></div><div className="inline-controls">
             <select className="admin-select" value={count} onChange={(e) => setCount(Number(e.target.value))}>{[10,50,100,500,1000].map((value) => <option key={value}>{value}</option>)}</select>
             <button className="primary-button" onClick={generate} disabled={busy}>生成兑换码</button>
-            <a className="primary-button" href="/api/admin/codes/export?format=simple">导出 CSV</a>
+            <a className="primary-button" href="/api/admin/codes/export?format=simple">导出表格</a>
             <a className="primary-button" href="/api/admin/codes/export?format=product">导出带商品名</a>
           </div></div>
           <table className="admin-table"><thead><tr><th>批次</th><th>生成时间</th><th>数量</th><th>未使用</th><th>最近导出</th></tr></thead><tbody>{summary.batches.map((batch) => <tr key={batch.batch_id}><td>{batch.batch_id}</td><td>{new Date(batch.created_at).toLocaleString("zh-CN")}</td><td>{batch.total_count}</td><td>{batch.unused_count}</td><td>{batch.last_exported_at ? new Date(batch.last_exported_at).toLocaleString("zh-CN") : "—"}</td></tr>)}</tbody></table>
         </section>
         <section className="admin-section">
-          <div className="admin-section-head"><div><p className="eyebrow">兑换码查询</p><h2>查询与操作</h2></div><form className="inline-controls" onSubmit={findCode}><input className="admin-select" value={search} onChange={(e) => setSearch(e.target.value.toUpperCase())} placeholder="LOVE-XXXX-XXXX" /><button className="primary-button">查询</button></form></div>
+          <div className="admin-section-head"><div><p className="eyebrow">兑换码查询</p><h2>查询与操作</h2></div><form className="inline-controls" onSubmit={findCode}><input className="admin-select" value={search} onChange={(e) => setSearch(e.target.value.toUpperCase())} placeholder="请输入兑换码" /><button className="primary-button">查询</button></form></div>
           {foundCode && <><table className="admin-table"><tbody>
-            <tr><th>兑换码</th><td>{foundCode.code}</td><th>状态</th><td>{foundCode.status}</td></tr>
+            <tr><th>兑换码</th><td>{foundCode.code}</td><th>状态</th><td>{CODE_STATUS_LABELS[foundCode.status] ?? "未知状态"}</td></tr>
             <tr><th>生成</th><td>{new Date(foundCode.created_at).toLocaleString("zh-CN")}</td><th>批次</th><td>{foundCode.batch_id}</td></tr>
             <tr><th>激活</th><td>{foundCode.activated_at ? new Date(foundCode.activated_at).toLocaleString("zh-CN") : "—"}</td><th>过期</th><td>{foundCode.expires_at ? new Date(foundCode.expires_at).toLocaleString("zh-CN") : "—"}</td></tr>
             <tr><th>完成次数</th><td>{foundCode.completed_count} / {foundCode.max_completed_count}</td><th>已导出</th><td>{foundCode.exported_at ? "是" : "否"}</td></tr>
@@ -115,7 +122,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
         </section>
         <section className="admin-section">
           <div className="admin-section-head"><div><p className="eyebrow">匿名结果统计</p><h2>人格结果分布 · 共 {summary.totalCompleted} 次</h2></div></div>
-          <div className="bar-list">{summary.personalities.map((item) => <div className="bar-row" key={item.id}><span><small>TYPE {item.id}</small>{PERSONALITY_BY_ID[item.id].name}</span><div className="bar-track"><div className="bar-fill" style={{ width: `${item.count / maxPersonality * 100}%` }} /></div><strong>{item.count}</strong></div>)}</div>
+          <div className="bar-list">{summary.personalities.map((item) => <div className="bar-row" key={item.id}><span><small>{item.id}号人格</small>{PERSONALITY_BY_ID[item.id].name}</span><div className="bar-track"><div className="bar-fill" style={{ width: `${item.count / maxPersonality * 100}%` }} /></div><strong>{item.count}</strong></div>)}</div>
         </section>
       </>}
       <p className="error-text" role="status">{message}</p>

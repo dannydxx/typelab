@@ -18,9 +18,9 @@ export function FreeHomeExperience() {
 
   return (
     <main className="app-shell free-landing page-padding">
-      <nav className="landing-nav"><p className="eyebrow">恋爱人格快速体验</p><span className="landing-index">FREE 08</span></nav>
+      <nav className="landing-nav"><p className="eyebrow">恋爱人格快速体验</p><span className="landing-index">免费版 · 08题</span></nav>
       <section className="free-hero">
-        <div className="free-archive-mark" aria-hidden="true"><span>FREE</span><strong>08</strong></div>
+        <div className="free-archive-mark" aria-hidden="true"><span>免费体验</span><strong>08</strong></div>
         <p className="eyebrow">一分钟人格速写</p>
         <h1>恋爱人格<br />快速体验</h1>
         <p className="hero-line">8个关系瞬间，<br />捕捉你心动之后的初步倾向。</p>

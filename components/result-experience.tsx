@@ -9,6 +9,7 @@ import type { DimensionScores, Personality, StoredResult } from "@/lib/types";
 import { ResultReveal } from "./result-reveal";
 import { normalizeStoredResult } from "@/lib/personality-compat";
 import { ResultDetailPage } from "./result-detail/result-detail-page";
+import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 
 function previewScoresFor(personality: Personality): DimensionScores {
   return {
@@ -25,6 +26,7 @@ export function ResultExperience() {
   const [analysisStep, setAnalysisStep] = useState(4);
   const [revealing, setRevealing] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
+  const [retestBusy, setRetestBusy] = useState(false);
   const personality = useMemo(() => result ? PERSONALITY_BY_ID[result.personalityId] : null, [result]);
 
   useEffect(() => {
@@ -76,8 +78,33 @@ export function ResultExperience() {
     catch { setActionMessage("复制失败，请长按文字手动复制。 "); }
   }
 
+  async function retest() {
+    const params = new URLSearchParams(window.location.search);
+    if (process.env.NODE_ENV === "development" && params.get("preview")) {
+      router.push("/premium");
+      return;
+    }
+
+    const sessionToken = localStorage.getItem(STORAGE_KEYS.session);
+    if (!sessionToken) {
+      setActionMessage("兑换会话已失效，请返回完整版首页重新验证兑换码。");
+      return;
+    }
+
+    setRetestBusy(true);
+    setActionMessage("正在准备新的测试……");
+    try {
+      await startPremiumAttempt(sessionToken);
+      router.push("/premium/test");
+    } catch (cause) {
+      setActionMessage(cause instanceof Error ? cause.message : "暂时无法开始测试，请稍后再试。");
+    } finally {
+      setRetestBusy(false);
+    }
+  }
+
   if (!result || !personality) return <main className="app-shell analysis-page"><p className="eyebrow">正在寻找你的人格档案……</p></main>;
   if (revealing) return <ResultReveal step={analysisStep} />;
 
-  return <ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} onSave={saveCard} onCopy={copyShareText} />;
+  return <ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push("/premium")} />;
 }

@@ -164,7 +164,6 @@ a { color: inherit; text-decoration: none; }
 .dimension-scale + .dimension-scale { margin-top: 34px; }
 .dimension-head { display: flex; justify-content: space-between; margin-bottom: 13px; }
 .dimension-head strong { font: 400 15px var(--font-serif); }
-.dimension-head small { color: var(--muted); font-size: 9px; letter-spacing: .12em; }
 .scale-labels { display: flex; justify-content: space-between; margin-bottom: 9px; color: var(--muted); font-size: 9px; letter-spacing: .08em; }
 .scale-track { position: relative; height: 1px; background: var(--line); }
 .scale-track::before, .scale-track::after { content: ""; position: absolute; top: -3px; width: 1px; height: 7px; background: var(--line); }
@@ -173,7 +172,6 @@ a { color: inherit; text-decoration: none; }
 .report { padding-top: 82px; padding-bottom: 76px; }
 .report-block { padding: 42px 0; border-top: 1px solid var(--line); }
 .report-number { display: block; margin-bottom: 24px; color: var(--personality); font: 44px/1 var(--font-serif); }
-.report-en { display: block; margin-bottom: 7px; color: var(--muted); font-size: 9px; letter-spacing: .16em; }
 .report-block h2 { margin: 0 0 22px; font: 400 23px/1.4 var(--font-serif); }
 .report-block p, .report-block li { margin: 0; color: #4a4843; font-size: 15px; line-height: 2; text-align: justify; }
 .report-block ul { margin: 0; padding: 0; list-style: none; counter-reset: report-list; }
@@ -181,12 +179,12 @@ a { color: inherit; text-decoration: none; }
 .report-block li::before { counter-increment: report-list; content: "0" counter(report-list); position: absolute; left: 0; color: var(--personality); font-size: 9px; }
 .result-actions { display: grid; gap: 10px; padding: 14px 0 80px; }
 .secondary-button { min-height: 48px; border: 1px solid var(--line); border-radius: 10px; background: transparent; cursor: pointer; }
+.secondary-button:disabled { cursor: wait; opacity: .55; }
 .result-note { margin: 24px 0 0; color: var(--muted); font-size: 10px; line-height: 1.7; text-align: center; }
 
 /* Result V2 editorial system */
 .result-page-v2 { color: var(--ink); }
 .v2-hero { min-height: auto; padding-bottom: 82px; }
-.v2-english-name { display: block; margin-top: 27px; color: var(--personality); font: 9px/1.4 var(--font-sans); letter-spacing: .22em; }
 .result-page-v2 .result-identity { padding-top: 0; }
 .result-page-v2 .result-identity h1 { margin-top: 8px; }
 .v2-short-description { margin: 20px 0 0; padding-top: 18px; border-top: 1px solid var(--line); color: #68645e; font-size: 12px; line-height: 1.9; }
@@ -194,7 +192,6 @@ a { color: inherit; text-decoration: none; }
 .v2-paper-section, .v2-position-section, .v2-os-section, .v2-share-section { background: var(--paper); }
 .v2-section-header { display: grid; grid-template-columns: 66px 1fr; gap: 14px; align-items: start; margin-bottom: 48px; }
 .v2-section-number { color: var(--personality); font: 48px/1 var(--font-serif); }
-.v2-section-header .eyebrow { margin: 2px 0 8px; }
 .v2-section-header h2 { margin: 0; font: 400 25px/1.4 var(--font-serif); letter-spacing: .035em; }
 .personality-summary > h3, .v2-editorial-copy h3, .result-share-panel > h3 { margin: 0 0 20px; font: 400 24px/1.6 var(--font-serif); }
 .v2-body-lead, .v2-editorial-copy > p:not(.v2-insight), .v2-section-intro { margin: 0; color: #4a4843; font-size: 14px; line-height: 2; text-align: justify; }
@@ -266,6 +263,7 @@ a { color: inherit; text-decoration: none; }
 .result-share-panel > h3 { margin-bottom: 0; }
 .result-share-panel .personality-quote { margin-top: 28px; }
 .result-share-panel .result-actions { padding-top: 48px; padding-bottom: 0; }
+.result-home-link { width: 100%; }
 .result-share-panel .error-text { text-align: center; }
 
 @media (max-width: 390px) {
