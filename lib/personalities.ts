@@ -3,8 +3,8 @@ import type { Personality } from "./types";
 // image 路径可替换为用户自行生成的 AI 人格视觉图片；文件缺失时界面会显示同色系艺术占位。
 export const PERSONALITIES: Personality[] = [
   {
-    id: "01", slug: "sunny-island-puppy", name: "晴岛小狗型",
-    traits: ["坦率", "温暖", "稳定", "主动"], tagline: "喜欢就是喜欢，爱得热烈但不拧巴。",
+    id: "01", typeNumber: 1, slug: "sunny-island-puppy", name: "晴岛小狗型", animal: "狗",
+    dimensions: ["稳定", "靠近", "直接", "解决"], keywords: ["坦率", "温暖", "稳定", "主动"], tagline: "喜欢就是喜欢，爱得热烈但不拧巴。",
     poles: ["stable", "close", "direct", "resolve"], image: "/personality/type01.webp",
     primaryColor: "#CB715B", secondaryColor: "#E9B77B", darkColor: "#40302B", visualKeywords: ["晴岛", "暖橘", "海风", "白色小狗"],
     report: {
@@ -18,8 +18,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "02", slug: "orange-light-fox", name: "橘光狐狸型",
-    traits: ["聪明", "热情", "分寸感", "成熟"], tagline: "会主动靠近，也知道什么时候停下来。",
+    id: "02", typeNumber: 2, slug: "orange-light-fox", name: "橘光狐狸型", animal: "狐狸",
+    dimensions: ["稳定", "靠近", "直接", "冷静"], keywords: ["聪明", "热情", "分寸感", "成熟"], tagline: "会主动靠近，也知道什么时候停下来。",
     poles: ["stable", "close", "direct", "calm"], image: "/personality/type02.webp",
     primaryColor: "#B8653F", secondaryColor: "#DDB58A", darkColor: "#3B2E28", visualKeywords: ["橘光", "狐狸", "黄昏", "丝绒"],
     report: {
@@ -33,8 +33,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "03", slug: "evening-breeze-deer", name: "晚风白鹿型",
-    traits: ["温柔", "慢热", "认真", "责任感"], tagline: "温柔慢热，但关系出了问题不会逃。",
+    id: "03", typeNumber: 3, slug: "evening-breeze-deer", name: "晚风白鹿型", animal: "白鹿",
+    dimensions: ["稳定", "靠近", "克制", "解决"], keywords: ["温柔", "慢热", "认真", "有责任感"], tagline: "温柔慢热，但关系出了问题不会逃。",
     poles: ["stable", "close", "restrained", "resolve"], image: "/personality/type03.webp",
     primaryColor: "#81917B", secondaryColor: "#C8C5AA", darkColor: "#30372F", visualKeywords: ["白鹿", "晚风", "苔色", "薄雾"],
     report: {
@@ -48,8 +48,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "04", slug: "pine-forest-cat", name: "松林白猫型",
-    traits: ["舒服", "陪伴", "边界", "温柔"], tagline: "喜欢陪伴，却不会把爱变成束缚。",
+    id: "04", typeNumber: 4, slug: "pine-forest-cat", name: "松林白猫型", animal: "白猫",
+    dimensions: ["稳定", "靠近", "克制", "冷静"], keywords: ["舒服", "陪伴", "边界", "温柔"], tagline: "喜欢陪伴，却不会把爱变成束缚。",
     poles: ["stable", "close", "restrained", "calm"], image: "/personality/type04.webp",
     primaryColor: "#738478", secondaryColor: "#CFD0C3", darkColor: "#29322E", visualKeywords: ["松林", "白猫", "晨雾", "亚麻"],
     report: {
@@ -63,8 +63,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "05", slug: "star-track-leopard", name: "星轨雪豹型",
-    traits: ["独立", "坦率", "清醒", "行动力"], tagline: "独立、有主见，爱你也不会失去自己。",
+    id: "05", typeNumber: 5, slug: "star-track-leopard", name: "星轨雪豹型", animal: "雪豹",
+    dimensions: ["稳定", "独立", "直接", "解决"], keywords: ["独立", "坦率", "清醒", "行动力"], tagline: "独立、有主见，爱你也不会失去自己。",
     poles: ["stable", "independent", "direct", "resolve"], image: "/personality/type05.webp",
     primaryColor: "#66788B", secondaryColor: "#B8C1CA", darkColor: "#252E38", visualKeywords: ["雪豹", "星轨", "冰蓝", "岩石"],
     report: {
@@ -78,8 +78,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "06", slug: "sea-salt-gull", name: "海盐海鸥型",
-    traits: ["自由", "松弛", "直接", "边界感"], tagline: "自由感很强，喜欢舒服有边界的关系。",
+    id: "06", typeNumber: 6, slug: "sea-salt-gull", name: "海盐海鸥型", animal: "海鸥",
+    dimensions: ["稳定", "独立", "直接", "冷静"], keywords: ["自由", "松弛", "直接", "边界感"], tagline: "自由感很强，喜欢舒服有边界的关系。",
     poles: ["stable", "independent", "direct", "calm"], image: "/personality/type06.webp",
     primaryColor: "#5F8990", secondaryColor: "#BCD1CF", darkColor: "#25373A", visualKeywords: ["海鸥", "海盐", "天青", "风"],
     report: {
@@ -93,8 +93,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "07", slug: "green-mountain-crane", name: "青山白鹤型",
-    traits: ["理性", "沉稳", "责任", "深度"], tagline: "看起来淡，其实对重要关系很认真。",
+    id: "07", typeNumber: 7, slug: "green-mountain-crane", name: "青山白鹤型", animal: "白鹤",
+    dimensions: ["稳定", "独立", "克制", "解决"], keywords: ["理性", "沉稳", "责任", "深度"], tagline: "看起来淡，其实对重要关系很认真。",
     poles: ["stable", "independent", "restrained", "resolve"], image: "/personality/type07.webp",
     primaryColor: "#526F66", secondaryColor: "#AABBB0", darkColor: "#24322E", visualKeywords: ["白鹤", "青山", "宣纸", "远岚"],
     report: {
@@ -108,8 +108,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "08", slug: "deep-sea-whale-song", name: "深海鲸歌型",
-    traits: ["安静", "稳定", "深情", "内敛"], tagline: "情绪很深，但更习惯安静地爱。",
+    id: "08", typeNumber: 8, slug: "deep-sea-whale-song", name: "深海鲸歌型", animal: "鲸",
+    dimensions: ["稳定", "独立", "克制", "冷静"], keywords: ["安静", "稳定", "深情", "内敛"], tagline: "情绪很深，但更习惯安静地爱。",
     poles: ["stable", "independent", "restrained", "calm"], image: "/personality/type08.webp",
     primaryColor: "#3D6370", secondaryColor: "#93ABB1", darkColor: "#1C2C33", visualKeywords: ["鲸", "深海", "靛青", "微光"],
     report: {
@@ -123,8 +123,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "09", slug: "honey-bear", name: "蜜糖小熊型",
-    traits: ["依恋", "热情", "坦率", "需要回应"], tagline: "很需要回应，也很愿意付出爱。",
+    id: "09", typeNumber: 9, slug: "honey-bear", name: "蜜糖小熊型", animal: "熊",
+    dimensions: ["敏感", "靠近", "直接", "解决"], keywords: ["依恋", "热情", "坦率", "需要回应"], tagline: "很需要回应，也很愿意付出爱。",
     poles: ["sensitive", "close", "direct", "resolve"], image: "/personality/type09.webp",
     primaryColor: "#B9854D", secondaryColor: "#E4C79C", darkColor: "#3D3023", visualKeywords: ["小熊", "蜂蜜", "琥珀光", "毛绒"],
     report: {
@@ -138,8 +138,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "10", slug: "firework-rabbit", name: "烟火兔型",
-    traits: ["热烈", "敏感", "可爱", "情绪鲜明"], tagline: "热烈又敏感，情绪来得快也退得快。",
+    id: "10", typeNumber: 10, slug: "firework-rabbit", name: "烟火兔型", animal: "兔",
+    dimensions: ["敏感", "靠近", "直接", "冷静"], keywords: ["热烈", "敏感", "可爱", "情绪鲜明"], tagline: "热烈又敏感，情绪来得快也退得快。",
     poles: ["sensitive", "close", "direct", "calm"], image: "/personality/type10.webp",
     primaryColor: "#C06C68", secondaryColor: "#E2AAA1", darkColor: "#422B2A", visualKeywords: ["白兔", "烟火", "珊瑚红", "夜风"],
     report: {
@@ -153,8 +153,8 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "11", slug: "moonlight-hedgehog", name: "月光刺猬型",
-    traits: ["敏感", "嘴硬", "细腻", "认真"], tagline: "嘴上说没事，其实每个细节都记得。",
+    id: "11", typeNumber: 11, slug: "moonlight-hedgehog", name: "月光刺猬型", animal: "刺猬",
+    dimensions: ["敏感", "靠近", "克制", "解决"], keywords: ["敏感", "嘴硬", "细腻", "认真"], tagline: "嘴上说没事，其实每个细节都记得。",
     poles: ["sensitive", "close", "restrained", "resolve"], image: "/personality/type11.webp",
     primaryColor: "#80738D", secondaryColor: "#C7BFD0", darkColor: "#302A36", visualKeywords: ["刺猬", "月光", "灰紫", "银叶"],
     report: {
@@ -168,10 +168,11 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "12", slug: "rain-night-deer", name: "雨夜小鹿型",
-    traits: ["慢热", "犹豫", "需要安全感", "温柔"], tagline: "很想靠近，却总怕自己靠得太近。",
+    id: "12", typeNumber: 12, slug: "rain-night-swan", name: "雨夜天鹅型", animal: "天鹅",
+    dimensions: ["敏感", "靠近", "克制", "冷静"], keywords: ["慢热", "犹豫", "优雅", "需要安全感"], tagline: "很想靠近，却总怕自己靠得太近。",
+    // TODO: 替换TYPE 12正式AI人格视觉（天鹅）。
     poles: ["sensitive", "close", "restrained", "calm"], image: "/personality/type12.webp",
-    primaryColor: "#637D86", secondaryColor: "#B6C5C5", darkColor: "#26353A", visualKeywords: ["小鹿", "雨夜", "雾蓝", "玻璃水痕"],
+    primaryColor: "#637D86", secondaryColor: "#B6C5C5", darkColor: "#26353A", visualKeywords: ["天鹅", "雨夜", "雾蓝", "玻璃水痕"],
     report: {
       base: "你的靠近总带着一点小心。你渴望被了解，又担心需求显得太多；于是许多浓烈情绪，被你处理成安静的等待。",
       inLove: "你会先确认安全，再一点点增加投入。对方一句不经意的话可能被你记很久，而一个持续的温柔动作，也足以让你慢慢相信。",
@@ -183,10 +184,11 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "13", slug: "amber-fox", name: "琥珀狐狸型",
-    traits: ["敏锐", "独立", "直接", "反差"], tagline: "表面潇洒，真正喜欢后反而格外认真。",
+    id: "13", typeNumber: 13, slug: "amber-wolf", name: "琥珀狼型", animal: "狼",
+    dimensions: ["敏感", "独立", "直接", "解决"], keywords: ["敏锐", "独立", "直接", "反差感"], tagline: "表面潇洒，真正喜欢后反而格外认真。",
+    // TODO: 替换TYPE 13正式AI人格视觉（狼）。
     poles: ["sensitive", "independent", "direct", "resolve"], image: "/personality/type13.webp",
-    primaryColor: "#A36D42", secondaryColor: "#D3B18A", darkColor: "#382B21", visualKeywords: ["狐狸", "琥珀", "金棕", "树影"],
+    primaryColor: "#A36D42", secondaryColor: "#D3B18A", darkColor: "#382B21", visualKeywords: ["狼", "琥珀", "金棕", "树影"],
     report: {
       base: "你外表有独立和利落的一面，内里却对重要关系异常敏锐。你不喜欢依赖感失控，所以会用坦率和解决问题来守住主动权。",
       inLove: "没有确认前你看起来潇洒，真正投入后会认真得超出预期。你会直接争取，也会在变化出现时快速捕捉并试图厘清。",
@@ -198,10 +200,11 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "14", slug: "aurora-cat", name: "极光猫型",
-    traits: ["个性", "敏感", "独立", "表达力"], tagline: "会表达情绪，但更需要自己的空间。",
+    id: "14", typeNumber: 14, slug: "aurora-otter", name: "极光水獭型", animal: "水獭",
+    dimensions: ["敏感", "独立", "直接", "冷静"], keywords: ["个性", "敏感", "灵动", "表达力"], tagline: "会表达情绪，但更需要自己的空间。",
+    // TODO: 替换TYPE 14正式AI人格视觉（水獭）。
     poles: ["sensitive", "independent", "direct", "calm"], image: "/personality/type14.webp",
-    primaryColor: "#597C78", secondaryColor: "#A7C1B9", darkColor: "#243431", visualKeywords: ["黑猫", "极光", "墨绿", "冷光"],
+    primaryColor: "#597C78", secondaryColor: "#A7C1B9", darkColor: "#243431", visualKeywords: ["水獭", "极光", "墨绿", "冷光"],
     report: {
       base: "你既有鲜明的情感表达，也有不可妥协的独处需求。你不怕说出感受，但不喜欢被要求立刻整理好全部情绪。",
       inLove: "你会直接展示喜欢，也会邀请对方看见你的复杂面。亲密并不会让你放弃个性；真正适合你的爱，应该容得下变化和呼吸。",
@@ -213,10 +216,11 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "15", slug: "mist-island-beluga", name: "雾岛白鲸型",
-    traits: ["防御", "深情", "慢热", "认真"], tagline: "不容易打开自己，一认真就会很深。",
+    id: "15", typeNumber: 15, slug: "mist-island-owl", name: "雾岛猫头鹰型", animal: "猫头鹰",
+    dimensions: ["敏感", "独立", "克制", "解决"], keywords: ["防御", "深情", "慢热", "观察型"], tagline: "不容易打开自己，一认真就会很深。",
+    // TODO: 替换TYPE 15正式AI人格视觉（猫头鹰）。
     poles: ["sensitive", "independent", "restrained", "resolve"], image: "/personality/type15.webp",
-    primaryColor: "#68848B", secondaryColor: "#C2D0CF", darkColor: "#27383D", visualKeywords: ["白鲸", "雾岛", "灰青", "珍珠光"],
+    primaryColor: "#68848B", secondaryColor: "#C2D0CF", darkColor: "#27383D", visualKeywords: ["猫头鹰", "雾岛", "灰青", "珍珠光"],
     report: {
       base: "你的感受很深，却有一层谨慎的保护。你习惯先靠自己，也不轻易展示需要；但一旦把谁放进心里，就会认真修复、认真负责。",
       inLove: "你可能在很长时间里表现得若无其事，确认安全后才逐步交出真实。爱越深，你越关注关系能否经得起问题，而不是只享受甜蜜。",
@@ -228,10 +232,11 @@ export const PERSONALITIES: Personality[] = [
     },
   },
   {
-    id: "16", slug: "snow-night-black-cat", name: "雪夜黑猫型",
-    traits: ["疏离", "敏锐", "克制", "隐藏情绪"], tagline: "越在意越安静，越喜欢越容易退后。",
+    id: "16", typeNumber: 16, slug: "snow-night-crow", name: "雪夜乌鸦型", animal: "乌鸦",
+    dimensions: ["敏感", "独立", "克制", "冷静"], keywords: ["疏离", "敏锐", "克制", "隐藏情绪"], tagline: "越在意越安静，越喜欢越容易退后。",
+    // TODO: 替换TYPE 16正式AI人格视觉（乌鸦）。
     poles: ["sensitive", "independent", "restrained", "calm"], image: "/personality/type16.webp",
-    primaryColor: "#4E5664", secondaryColor: "#A9ACB4", darkColor: "#20232A", visualKeywords: ["黑猫", "雪夜", "石墨", "冷月"],
+    primaryColor: "#4E5664", secondaryColor: "#A9ACB4", darkColor: "#20232A", visualKeywords: ["乌鸦", "雪夜", "石墨", "冷月"],
     report: {
       base: "你有敏锐的雷达，也有安静的退路。越是重要的人，越可能触发你对失去和失控的警觉；于是你把很多在意藏进距离里。",
       inLove: "你不会轻易追赶，更常在靠近后重新确认安全。看起来淡淡的，心里却记得许多细节；你的慢，不是无动于衷，而是在保护珍贵的部分。",

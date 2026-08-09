@@ -159,9 +159,9 @@ npm run typecheck
 
 ## 12. 修改 16 人格文案与颜色
 
-全部人格资料在 [`lib/personalities.ts`](lib/personalities.ts)。每种人格包含名称、关键词、一句话、四维组合、颜色、视觉关键词和七段独立报告。
+全部人格资料在 [`lib/personalities.ts`](lib/personalities.ts)。每种人格包含稳定 TYPE ID、动物、名称、关键词、一句话、四维组合、颜色、视觉关键词和七段独立报告。免费版、完整版、分享卡和后台统计都会读取这一个数据源。
 
-不要改变 `id` 的 `01—16` 对应关系，除非也同步迁移数据库中的历史 `personality_type`。
+16 个动物固定且互不重复。不要改变 `id` 的 `01—16` 对应关系或 TYPE 对应动物，除非用户明确要求并同步评估历史 `personality_type` 数据。
 
 ## 13. 替换 16 张 AI 人格图片
 

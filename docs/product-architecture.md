@@ -50,6 +50,8 @@ public/personality/          两个版本共用的16张人格图片
 - 替换人格图片：替换 `public/personality/type01.webp` 至 `type16.webp`。
 - 修改品牌、账号、购买链接及模式开关：编辑 `lib/config.ts`。
 
+16 种人格的 TYPE 编号是稳定 ID，动物映射固定且互不重复。免费结果、完整结果、分享卡与后台统计都必须通过 `lib/personalities.ts` 获取当前名称和视觉信息；旧名称只允许出现在 `lib/personality-compat.ts` 的本地历史结果兼容映射中。数据库保存 `01`—`16` 的稳定 ID，因此人格名称更新不需要迁移历史数据库记录。
+
 ## 部署
 
 这是同一个 Next.js 应用，不是两套部署。按主 README 部署一次到 Vercel 后，`https://domain.com/free` 和 `https://domain.com/premium` 会同时可用。

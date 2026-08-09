@@ -16,7 +16,7 @@ export function PersonalityVisual({ personality, className = "" }: { personality
       {failed && (
         <div className="visual-fallback" role="img" aria-label={`${personality.name}艺术视觉占位`}>
           <span className="visual-index">{personality.id}</span>
-          <span className="visual-symbol" aria-hidden="true">{personality.name.slice(-2, -1)}</span>
+          <span className="visual-symbol" aria-hidden="true">{personality.animal}</span>
           <p className="visual-caption">{personality.visualKeywords.join(" · ")}</p>
         </div>
       )}

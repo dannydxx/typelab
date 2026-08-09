@@ -8,6 +8,7 @@ import { ResultReveal } from "./result-reveal";
 import { FREE_STORAGE_KEYS } from "@/lib/config";
 import { PERSONALITY_BY_ID } from "@/lib/personalities";
 import type { StoredResult } from "@/lib/types";
+import { normalizeStoredResult } from "@/lib/personality-compat";
 
 export function FreeResultExperience() {
   const router = useRouter();
@@ -19,7 +20,10 @@ export function FreeResultExperience() {
   useEffect(() => {
     const raw = localStorage.getItem(FREE_STORAGE_KEYS.lastResult);
     if (!raw) { router.replace("/free"); return; }
-    try { setResult(JSON.parse(raw)); } catch { router.replace("/free"); return; }
+    const normalized = normalizeStoredResult(raw);
+    if (!normalized) { router.replace("/free"); return; }
+    localStorage.setItem(FREE_STORAGE_KEYS.lastResult, JSON.stringify(normalized));
+    setResult(normalized);
     if (new URLSearchParams(window.location.search).get("reveal") === "1") {
       setRevealing(true);
       const timers = [240, 480, 720, 960].map((delay, index) => window.setTimeout(() => setStep(index + 1), delay));
@@ -39,7 +43,7 @@ export function FreeResultExperience() {
         <p className="eyebrow">你的初步恋爱人格倾向</p>
         <h1>{personality.name}</h1>
         <p className="free-result-tagline">{personality.tagline}</p>
-        <div className="trait-row">{personality.traits.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
+        <div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
         <p className="free-result-note">这是基于8道精选题得到的初步倾向。完整测试会用20个恋爱场景重新校准四个维度，结果可能发生变化。</p>
       </section>
       <section className="free-unlock-panel">

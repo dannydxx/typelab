@@ -50,7 +50,7 @@ export async function createShareCard(personality: Personality, result: StoredRe
 
   let traitX = 70;
   ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
-  personality.traits.forEach((trait) => {
+  personality.keywords.forEach((trait) => {
     const width = ctx.measureText(trait).width + 38;
     ctx.fillStyle = personality.secondaryColor; roundedRect(ctx, traitX, 1090, width, 46, 4);
     ctx.fillStyle = personality.darkColor; ctx.fillText(trait, traitX + 19, 1122); traitX += width + 14;

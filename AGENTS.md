@@ -21,6 +21,13 @@ This project uses Next.js App Router, TypeScript, Supabase PostgreSQL/Auth, and 
 - Keep environment-specific values in local `.env*` files that are ignored by Git. Commit a safe `.env.example` with placeholder values only.
 - Keep dependencies and scripts declared in the project manifest; do not rely on globally installed project tooling.
 
+## Personality IP Contract
+
+- 16型恋爱人格使用固定且互不重复的动物IP。TYPE编号是稳定ID，中文名称和视觉资源均通过统一人格数据源映射。未经用户明确要求，不得修改TYPE对应动物，也不得重新引入重复动物。
+- `lib/personalities.ts` is the only current personality-content source for free results, premium results, share cards, and administrator statistics. Never create a second personality mapping.
+- Keep image filenames stable as `public/personality/type01.webp` through `type16.webp`. Missing files must fall back to the existing placeholder instead of breaking the page.
+- Preserve legacy-name compatibility only in a clearly labelled migration layer. Do not display retired names in current UI or documentation.
+
 ## File Organization
 
 - Use lowercase, hyphenated filenames for standalone files and folders unless the selected framework convention requires otherwise.

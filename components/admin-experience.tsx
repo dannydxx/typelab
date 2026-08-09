@@ -115,7 +115,7 @@ export function AdminExperience({ initialAuthenticated }: { initialAuthenticated
         </section>
         <section className="admin-section">
           <div className="admin-section-head"><div><p className="eyebrow">匿名结果统计</p><h2>人格结果分布 · 共 {summary.totalCompleted} 次</h2></div></div>
-          <div className="bar-list">{summary.personalities.map((item) => <div className="bar-row" key={item.id}><span>{PERSONALITY_BY_ID[item.id].name}</span><div className="bar-track"><div className="bar-fill" style={{ width: `${item.count / maxPersonality * 100}%` }} /></div><strong>{item.count}</strong></div>)}</div>
+          <div className="bar-list">{summary.personalities.map((item) => <div className="bar-row" key={item.id}><span><small>TYPE {item.id}</small>{PERSONALITY_BY_ID[item.id].name}</span><div className="bar-track"><div className="bar-fill" style={{ width: `${item.count / maxPersonality * 100}%` }} /></div><strong>{item.count}</strong></div>)}</div>
         </section>
       </>}
       <p className="error-text" role="status">{message}</p>

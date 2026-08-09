@@ -9,6 +9,7 @@ import { PRODUCT_CONFIG, STORAGE_KEYS } from "@/lib/config";
 import { createShareCard } from "@/lib/share-card";
 import type { StoredResult } from "@/lib/types";
 import { ResultReveal } from "./result-reveal";
+import { normalizeStoredResult } from "@/lib/personality-compat";
 
 const reportSections = [
   ["01", "BASE", "你的恋爱底色", "base"],
@@ -44,7 +45,10 @@ export function ResultExperience() {
     if (!localStorage.getItem(STORAGE_KEYS.session)) { router.replace("/premium"); return; }
     const raw = localStorage.getItem(STORAGE_KEYS.lastResult);
     if (!raw) { router.replace("/premium"); return; }
-    try { setResult(JSON.parse(raw)); } catch { router.replace("/premium"); return; }
+    const normalized = normalizeStoredResult(raw);
+    if (!normalized) { router.replace("/premium"); return; }
+    localStorage.setItem(STORAGE_KEYS.lastResult, JSON.stringify(normalized));
+    setResult(normalized);
     const shouldReveal = params.get("reveal") === "1";
     if (shouldReveal) {
       setRevealing(true); setAnalysisStep(0);
@@ -84,7 +88,7 @@ export function ResultExperience() {
         <PersonalityVisual personality={personality} />
         <div className="result-identity">
           <p className="eyebrow">你的恋爱人格是</p><h1>{personality.name}</h1><p className="result-tagline">{personality.tagline}</p>
-          <div className="trait-row">{personality.traits.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
+          <div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
         </div>
       </section>
       <section className="dimensions page-padding">

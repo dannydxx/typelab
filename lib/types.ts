@@ -32,9 +32,12 @@ export interface PersonalityReport {
 
 export interface Personality {
   id: string;
+  typeNumber: number;
   slug: string;
   name: string;
-  traits: [string, string, string, string];
+  animal: string;
+  dimensions: [string, string, string, string];
+  keywords: [string, string, string, string];
   tagline: string;
   poles: ["stable" | "sensitive", "independent" | "close", "restrained" | "direct", "calm" | "resolve"];
   image: string;
