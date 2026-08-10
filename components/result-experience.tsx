@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PERSONALITY_BY_ID } from "@/lib/personalities";
-import { createShareCard } from "@/lib/share-card";
+import { createPremiumShareCard } from "@/lib/premium-share-card";
 import type { StoredResult } from "@/lib/types";
 import { ResultReveal } from "./result-reveal";
 import { ResultDetailPage } from "./result-detail/result-detail-page";
@@ -33,7 +33,7 @@ export function ResultExperience({ result }: { result: StoredResult }) {
     if (!personality || !result) return;
     setActionMessage("正在生成人格艺术卡…");
     try {
-      const blob = await createShareCard(personality, result);
+      const blob = await createPremiumShareCard(personality, result);
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a"); anchor.href = url; anchor.download = `恋爱人格-${personality.name}.png`; anchor.click();
       window.setTimeout(() => URL.revokeObjectURL(url), 1000);

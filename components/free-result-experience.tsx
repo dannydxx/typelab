@@ -19,6 +19,7 @@ import {
 import { getConfiguredPurchaseUrl } from "@/lib/purchase-config";
 import { getFreeRedeemAction, getFreeUnlockCopy } from "@/lib/free-result-conversion";
 import { parseFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
+import { FreeSharePanel } from "./free-share-panel";
 
 const reportDirectory = [
   ["01", "人格摘要"],
@@ -125,6 +126,8 @@ export function FreeResultExperience() {
       </section>
 
       <PreliminaryRelationshipPreview scores={result.scores} definitions={preview.relationshipPosition} />
+
+      <FreeSharePanel preview={preview} />
 
       <section className="free-editorial-section free-report-directory page-padding">
         <header className="free-section-heading"><span>04</span><div><p className="eyebrow">完整版报告目录</p><h2>这份档案会继续展开什么</h2></div></header>

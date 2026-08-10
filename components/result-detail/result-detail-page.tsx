@@ -54,6 +54,11 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
           <p className="v2-short-description">{v2.shortDescription}</p>
           <div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
         </div>
+        <div className="premium-hero-save">
+          <button className="secondary-button" type="button" onClick={onSave}>保存我的人格卡</button>
+          <p>完整人格卡 · 高清保存</p>
+          {actionMessage && <span role="status">{actionMessage}</span>}
+        </div>
       </section>
 
       <ResultSection number="01" title="人格摘要" className="v2-summary-section">
@@ -133,6 +138,7 @@ function LegacyResultDetail({ personality, result, actionMessage, retestBusy, on
       <header className="result-top"><p className="eyebrow">16型恋爱人格测试</p><span className="type-number">{personality.id}号人格</span></header>
       <PersonalityVisual personality={personality} mode="premium" />
       <div className="result-identity"><p className="eyebrow">正式人格 · 完整揭晓</p><h1>{personality.name}</h1><p className="result-tagline">{personality.tagline}</p><div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div></div>
+      <div className="premium-hero-save"><button className="secondary-button" type="button" onClick={onSave}>保存我的人格卡</button><p>完整人格卡 · 高清保存</p>{actionMessage && <span role="status">{actionMessage}</span>}</div>
     </section>
     <section className="dimensions page-padding">
       <p className="eyebrow">四维关系坐标</p><h2 className="section-heading">你在关系里的位置</h2>

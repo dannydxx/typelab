@@ -7,7 +7,7 @@ export async function GET() {
       <div style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ fontSize: 20, letterSpacing: 7, color: "#77736c" }}>16型恋爱人格测试</div>
         <div style={{ fontSize: 76, marginTop: 30, fontFamily: "serif" }}>16型恋爱人格测试</div>
-        <div style={{ display: "flex", fontSize: 29, marginTop: 34, color: "#55524c" }}>有些人越喜欢越主动，有些人越喜欢反而越安静。</div>
+        <div style={{ display: "flex", fontSize: 29, marginTop: 34, color: "#55524c" }}>免费开始 · 8道精选题 · 16种恋爱人格</div>
       </div>
     </div>,
     { width: 1200, height: 630 },

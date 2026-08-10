@@ -1,11 +1,13 @@
+export const PUBLIC_SITE_URL = process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
+
 export const PRODUCT_CONFIG = {
   brandName: "未央关系研究所",
   testName: "16型恋爱人格测试",
-  xhsAccount: "@你的品牌账号",
+  xhsAccount: "",
   redeemValidHours: 24,
   maxCompletedTests: 3,
   showQrCode: false,
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  siteUrl: PUBLIC_SITE_URL,
   purchaseUrl: "",
 } as const;
 
