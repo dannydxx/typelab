@@ -44,11 +44,11 @@ describe("formal personality IP system", () => {
 
   it("maps the five updated animals to their original scoring types", () => {
     expect(PERSONALITIES.slice(11).map(({ id, keywords }) => ({ id, keywords }))).toEqual([
-      { id: "12", keywords: ["慢热", "犹豫", "优雅", "需要安全感"] },
-      { id: "13", keywords: ["敏锐", "独立", "直接", "反差感"] },
-      { id: "14", keywords: ["个性", "敏感", "灵动", "表达力"] },
-      { id: "15", keywords: ["防御", "深情", "慢热", "观察型"] },
-      { id: "16", keywords: ["疏离", "敏锐", "克制", "隐藏情绪"] },
+      { id: "12", keywords: ["明确欢迎", "渐进靠近", "低压邀请", "谨慎表达"] },
+      { id: "13", keywords: ["完整事实", "直接核实", "自主选择", "信息边界"] },
+      { id: "14", keywords: ["动态真实", "自我更新", "重新协商", "承担影响"] },
+      { id: "15", keywords: ["关系学习", "影响负责", "行为改变", "共同修复"] },
+      { id: "16", keywords: ["侧向靠近", "低暴露信号", "按比例回应", "功能性关心"] },
     ]);
   });
 
