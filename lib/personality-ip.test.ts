@@ -61,7 +61,7 @@ describe("formal personality IP system", () => {
 
   it("keeps every migrated V2 complete, distinct and mobile-readable", () => {
     const migrated = PERSONALITIES.filter((item) => item.v2);
-    expect(migrated.map((item) => item.id)).toEqual(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"]);
+    expect(migrated.map((item) => item.id)).toEqual(["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12", "13"]);
 
     const chineseLength = (value: string) => value.match(/[\u3400-\u9fff]/g)?.length ?? 0;
     for (const personality of migrated) {
