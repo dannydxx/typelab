@@ -160,27 +160,25 @@ export interface PremiumProgress {
 }
 
 export interface PremiumAccessState {
-  entitled: boolean;
+  authorized: boolean;
   canStart: boolean;
   hasActiveAttempt: boolean;
   activeAttemptId: string | null;
   hasCompletedResult: boolean;
 }
 
-export interface PremiumEntitlement {
-  entitled: boolean;
-  source: "xiaohongshu";
-  productId?: string;
-  orderId?: string;
-  grantedAt?: string;
-}
+export type AccessCodeStatus = "UNUSED" | "ACTIVE" | "EXPIRED" | "REVOKED";
 
-export interface PlatformEntitlementIdentity {
-  entitlementId: string;
-  platformUserId: string;
-  entitlement: PremiumEntitlement & { entitled: true };
-  maxCompletedTests: number;
-  fixture: boolean;
+export interface AccessCodeBatchSummary {
+  id: string;
+  label: string;
+  createdAt: string;
+  codeCount: number;
+  validityHours: number;
+  unusedCount: number;
+  activeCount: number;
+  expiredCount: number;
+  revokedCount: number;
 }
 
 export type PersonalityPortraitData = Pick<

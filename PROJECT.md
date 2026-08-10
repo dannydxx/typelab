@@ -4,7 +4,7 @@
 
 Version 1 of the Chinese mobile H5 product “16型恋爱人格测试” is implemented and preparing for production configuration and deployment.
 
-The product has two independent journeys: a public 8-question acquisition experience at `/` and `/free`, and an XHS-entitlement-gated 20-question experience at `/premium`. Xiaohongshu owns product display, price, order, and payment; the application only validates Premium entitlement.
+The product has two independent journeys: a public 8-question acquisition experience at `/` and `/free`, and an Access-Session-gated 20-question experience at `/premium`. Xiaohongshu owns product display, price, order, payment, and automatic delivery; the application validates only the one-order-one-code delivery credential.
 
 ## Workspace Scope
 
@@ -13,7 +13,7 @@ The product has two independent journeys: a public 8-question acquisition experi
 ## Architecture Baseline
 
 - Next.js App Router + TypeScript for the mobile H5 and server API routes
-- Supabase PostgreSQL for platform entitlements, attempts, anonymous result statistics, and administrator accounts
+- Supabase PostgreSQL for Access Code inventory, HttpOnly session records, attempts, anonymous result statistics, and administrator accounts
 - Server-only Supabase service key for all protected operations; no business tables are directly readable from the browser
 - Vercel as the intended production deployment target
 - Local storage only for unfinished answers and free-result continuity; it can never grant Premium access
@@ -60,3 +60,4 @@ TYPE 编号是历史结果、评分组合、前后端统计和视觉资源的稳
 | 2026-08-09 | Added the independent free acquisition journey and reorganized shared resources. |
 | 2026-08-10 | Updated the formal personality IP system to a fixed, unique 16-animal mapping while preserving stable TYPE IDs. |
 | 2026-08-10 | Replaced the internal purchase/code model with a server-side Xiaohongshu Premium entitlement boundary. |
+| 2026-08-11 | Replaced the unimplemented platform entitlement boundary with external-commerce one-order-one-code delivery and HttpOnly Access Sessions. |

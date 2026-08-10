@@ -103,7 +103,7 @@ a { color: inherit; text-decoration: none; }
 .platform-access-state { margin-top: 30px; padding: 24px 0; border-block: 1px solid var(--line); }
 .platform-access-state p { margin: 0 0 10px; font: 400 18px/1.6 var(--font-serif); }
 .platform-access-state span { display: block; color: var(--muted); font-size: 11px; line-height: 1.8; }
-.platform-commerce-link { display: flex; align-items: center; justify-content: center; margin-top: 18px; text-decoration: none; }
+.access-entry-link { display: flex; align-items: center; justify-content: center; margin-top: 18px; text-decoration: none; }
 .premium-retest { width: 100%; }
 .disclaimer { margin: 38px 0 0; color: #8c8880; font-size: 10px; line-height: 1.7; }
 
@@ -300,6 +300,17 @@ a { color: inherit; text-decoration: none; }
 .modal p { margin: 0 0 26px; color: var(--muted); font-size: 13px; line-height: 1.8; }
 .modal-actions { display: grid; gap: 8px; }
 
+/* Premium access */
+.premium-entry-hero { padding-top: clamp(72px, 13vh, 112px); }
+.access-code-panel { margin-top: 32px; padding-top: 26px; border-top: 1px solid var(--line); }
+.access-code-panel label { display: block; margin-bottom: 12px; color: var(--muted); font-size: 11px; line-height: 1.7; }
+.access-code-panel input { width: 100%; height: 58px; padding: 0 18px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.42); color: var(--ink); font: 400 21px/1 var(--font-serif); letter-spacing: .15em; text-transform: uppercase; }
+.access-code-panel input:focus { outline: 1px solid var(--ink); outline-offset: 2px; }
+.access-code-panel .primary-button { margin-top: 12px; }
+.access-code-panel .error-text { min-height: 18px; margin-top: 12px; }
+.premium-access-checking { margin-top: 32px; color: var(--muted); font-size: 12px; }
+.premium-content-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; margin: 28px 0 0; padding: 22px 0; border-block: 1px solid var(--line); list-style: none; color: var(--muted); font-size: 11px; }
+
 /* Admin */
 .admin-page { min-height: 100vh; padding: 36px 24px 70px; background: #eeeae2; }
 .admin-inner { width: min(100%, 980px); margin: 0 auto; }
@@ -328,6 +339,10 @@ a { color: inherit; text-decoration: none; }
 .bar-row > span { display: grid; gap: 3px; }
 .bar-row > span small { color: var(--muted); font-size: 8px; letter-spacing: .1em; }
 .bar-track { height: 3px; background: #ddd8ce; }.bar-fill { height: 100%; background: var(--accent); }
+.access-batch-form { max-width: 620px; }
+.access-batch-form .inline-controls { align-items: center; }
+.admin-help { margin: 15px 0 0; color: var(--muted); font-size: 11px; line-height: 1.75; }
+.admin-table td small { display: block; margin-top: 4px; color: var(--muted); font-size: 9px; }
 
 @keyframes fade-up { from { opacity: 0; transform: translateY(8px); } }
 @keyframes modal-up { from { opacity: 0; transform: translateY(20px); } }
@@ -416,10 +431,10 @@ a { color: inherit; text-decoration: none; }
 .free-premium-panel .eyebrow { color: #9ea59d; }
 .free-premium-panel h2 { margin: 18px 0 22px; font: 400 28px/1.55 var(--font-serif); }
 .free-premium-panel > p:not(.eyebrow) { margin: 0 0 34px; color: #bfc2bc; font-size: 13px; line-height: 1.9; }
-.platform-commerce-note { margin: 0 0 20px; padding: 20px 0; border-block: 1px solid rgba(245,242,235,.2); }
-.platform-commerce-note span { color: #a8ada7; font-size: 9px; letter-spacing: .14em; }
-.platform-commerce-note p { margin: 9px 0 0; color: #d2d2cc; font-size: 12px; line-height: 1.75; }
-.free-premium-panel .platform-commerce-link { color: #f5f2eb; border-color: rgba(245,242,235,.28); }
+.access-delivery-note { margin: 0 0 20px; padding: 20px 0; border-block: 1px solid rgba(245,242,235,.2); }
+.access-delivery-note span { color: #a8ada7; font-size: 9px; letter-spacing: .14em; }
+.access-delivery-note p { margin: 9px 0 0; color: #d2d2cc; font-size: 12px; line-height: 1.75; }
+.free-premium-panel .access-entry-link { color: #f5f2eb; border-color: rgba(245,242,235,.28); }
 .free-retry { display: block; width: 100%; margin-top: 8px; color: #a8ada7; text-align: center; }
 
 @media (max-width: 390px) {

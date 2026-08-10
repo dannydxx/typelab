@@ -1,13 +1,9 @@
-import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { ResultExperience } from "@/components/result-experience";
-import { XHS_FIXTURE_RESULT_COOKIE_NAME, PREMIUM_MODE } from "@/lib/config";
+import { PREMIUM_MODE } from "@/lib/config";
 import { PERSONALITY_BY_ID } from "@/lib/personalities";
-import {
-  decodeFixturePremiumResult,
-  getPremiumResultForEntitlement,
-} from "@/lib/server/premium-access";
-import { getPremiumEntitlementIdentityFromServerContext } from "@/lib/server/xhs-entitlement";
+import { getPremiumResultForAccess } from "@/lib/server/premium-access";
+import { getAccessSessionFromServerCookies } from "@/lib/server/access-session";
 import type { DimensionScores, StoredResult } from "@/lib/types";
 
 function previewResult(personalityId: string): StoredResult | null {
@@ -39,12 +35,9 @@ export default async function PremiumResultPage({
     if (result) return <ResultExperience result={result} />;
   }
 
-  const identity = await getPremiumEntitlementIdentityFromServerContext();
-  if (!identity?.entitlement.entitled) redirect("/premium");
-
-  const result = identity.fixture
-    ? decodeFixturePremiumResult((await cookies()).get(XHS_FIXTURE_RESULT_COOKIE_NAME)?.value)
-    : await getPremiumResultForEntitlement(identity);
+  const identity = await getAccessSessionFromServerCookies();
+  if (!identity) redirect("/premium");
+  const result = await getPremiumResultForAccess(identity);
   if (!result) redirect("/premium");
 
   return <ResultExperience result={result} />;

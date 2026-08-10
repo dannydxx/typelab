@@ -13,7 +13,6 @@ import { parseFreeStoredResult } from "@/lib/free-stored-result";
 import { getFreePremiumCopy } from "@/lib/free-result-conversion";
 import { parseFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
 import { FreeSharePanel } from "./free-share-panel";
-import { getPlatformCommerceAction } from "@/lib/platform-commerce";
 
 const reportDirectory = [
   ["01", "人格摘要"],
@@ -38,7 +37,6 @@ export function FreeResultExperience() {
   const [hasTransferableAnswers, setHasTransferableAnswers] = useState(false);
   const [loadError, setLoadError] = useState("");
   const premiumCopy = getFreePremiumCopy(hasTransferableAnswers);
-  const commerceAction = getPlatformCommerceAction();
 
   useEffect(() => {
     let cancelled = false;
@@ -112,11 +110,11 @@ export function FreeResultExperience() {
         <p className="eyebrow">06 / 完整版人格报告</p>
         <h2>{premiumCopy.title}</h2>
         <p>{premiumCopy.description}</p>
-        <div className="platform-commerce-note">
-          <span>小红书平台商品</span>
-          <p>完整版通过小红书商品提供，商品、价格与订单均由小红书平台管理。</p>
+        <div className="access-delivery-note">
+          <span>完整版访问方式</span>
+          <p>完整版访问码由小红书订单自动发货提供，收到后可直接进入完整版测试。</p>
         </div>
-        {commerceAction.available && <a className="secondary-button platform-commerce-link" href={commerceAction.href} target="_blank" rel="noreferrer">{commerceAction.label}</a>}
+        <Link className="secondary-button access-entry-link" href="/premium">已有访问码，进入完整版</Link>
         <Link className="text-button free-retry" href="/free">重新体验免费版</Link>
       </section>
     </main>

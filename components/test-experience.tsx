@@ -34,10 +34,10 @@ export function TestExperience() {
     let cancelled = false;
     async function loadAuthorizedAttempt() {
       try {
-        const response = await fetch("/api/premium/entitlement", { credentials: "same-origin", cache: "no-store" });
+        const response = await fetch("/api/access/session", { credentials: "same-origin", cache: "no-store" });
         const state = await response.json() as PremiumAccessState;
         if (cancelled) return;
-        if (!response.ok || !state.entitled) {
+        if (!response.ok || !state.authorized) {
           clearPremiumClientStorage();
           router.replace("/premium");
           return;

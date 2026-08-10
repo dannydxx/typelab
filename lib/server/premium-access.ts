@@ -1,31 +1,25 @@
 import "server-only";
-import { createHmac, timingSafeEqual } from "crypto";
 import { createServiceClient } from "@/lib/supabase/service";
-import type {
-  DimensionScores,
-  PlatformEntitlementIdentity,
-  PremiumAccessState,
-  StoredResult,
-} from "@/lib/types";
+import type { AccessSessionIdentity } from "@/lib/server/access-session";
+import type { DimensionScores, PremiumAccessState, StoredResult } from "@/lib/types";
 
-export interface EntitledResultRow {
+export interface AccessResultRow {
   attempt_id: string;
-  entitlement_id: string;
+  access_code_id: string;
   personality_type: string;
   dimension_scores: unknown;
   completed_at: string;
 }
 
-export interface EntitledAttemptRow {
+export interface AccessAttemptRow {
   id: string;
-  entitlement_id: string;
-  platform_user_id: string;
+  access_code_id: string;
   status: string;
   completed_at: string | null;
 }
 
 const deniedState = (): PremiumAccessState => ({
-  entitled: false,
+  authorized: false,
   canStart: false,
   hasActiveAttempt: false,
   activeAttemptId: null,
@@ -33,17 +27,16 @@ const deniedState = (): PremiumAccessState => ({
 });
 
 export function createPremiumAccessState(
-  identity: PlatformEntitlementIdentity | null,
-  completedCount: number,
-  activeAttemptId: string | null,
+  identity: AccessSessionIdentity | null,
+  attempt: AccessAttemptRow | null,
   hasCompletedResult: boolean,
 ): PremiumAccessState {
-  if (!identity?.entitlement.entitled) return deniedState();
+  if (!identity) return deniedState();
   return {
-    entitled: true,
-    canStart: completedCount < identity.maxCompletedTests,
-    hasActiveAttempt: Boolean(activeAttemptId),
-    activeAttemptId,
+    authorized: true,
+    canStart: !attempt,
+    hasActiveAttempt: attempt?.status === "started",
+    activeAttemptId: attempt?.status === "started" ? attempt.id : null,
     hasCompletedResult,
   };
 }
@@ -60,19 +53,19 @@ function isDimensionScores(value: unknown): value is DimensionScores {
   );
 }
 
-export function validateEntitledResultRecords(
-  identity: PlatformEntitlementIdentity | null,
-  result: EntitledResultRow | null,
-  attempt: EntitledAttemptRow | null,
+export function validatePremiumResultRecords(
+  identity: AccessSessionIdentity | null,
+  result: AccessResultRow | null,
+  attempt: AccessAttemptRow | null,
 ): StoredResult | null {
   if (
-    !identity?.entitlement.entitled
+    !identity
     || !result
     || !attempt
-    || result.entitlement_id !== identity.entitlementId
-    || attempt.entitlement_id !== identity.entitlementId
-    || attempt.platform_user_id !== identity.platformUserId
+    || result.access_code_id !== identity.accessCodeId
+    || attempt.access_code_id !== identity.accessCodeId
     || attempt.id !== result.attempt_id
+    || identity.attemptId !== attempt.id
     || attempt.status !== "completed"
     || !attempt.completed_at
     || !/^(0[1-9]|1[0-6])$/.test(result.personality_type)
@@ -87,65 +80,35 @@ export function validateEntitledResultRecords(
   };
 }
 
-function fixtureSigningSecret() {
-  return process.env.XHS_FIXTURE_SIGNING_SECRET || "development-only-xhs-fixture-secret";
-}
-
-function fixtureSignature(payload: string) {
-  return createHmac("sha256", fixtureSigningSecret()).update(payload).digest("base64url");
-}
-
-export function encodeFixturePremiumResult(result: StoredResult) {
-  const payload = Buffer.from(JSON.stringify(result)).toString("base64url");
-  return `${payload}.${fixtureSignature(payload)}`;
-}
-
-export function decodeFixturePremiumResult(value: string | null | undefined): StoredResult | null {
-  if (!value) return null;
-  const [payload, signature] = value.split(".");
-  if (!payload || !signature) return null;
-  const expected = fixtureSignature(payload);
-  const signatureBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expected);
-  if (signatureBuffer.length !== expectedBuffer.length || !timingSafeEqual(signatureBuffer, expectedBuffer)) return null;
-  try {
-    const result = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as StoredResult;
-    if (typeof result.attemptId !== "string" || !/^(0[1-9]|1[0-6])$/.test(result.personalityId) || !isDimensionScores(result.scores) || Number.isNaN(Date.parse(result.completedAt))) return null;
-    return result;
-  } catch {
-    return null;
-  }
-}
-
-export async function getPremiumAccessState(
-  identity: PlatformEntitlementIdentity | null,
-  fixtureState?: { activeAttemptId?: string | null; resultCookie?: string | null },
-): Promise<PremiumAccessState> {
-  if (!identity?.entitlement.entitled) return deniedState();
-  if (identity.fixture) {
-    const result = decodeFixturePremiumResult(fixtureState?.resultCookie);
-    return createPremiumAccessState(identity, result ? 1 : 0, fixtureState?.activeAttemptId ?? null, Boolean(result));
-  }
-
+export async function getPremiumAccessState(identity: AccessSessionIdentity | null): Promise<PremiumAccessState> {
+  if (!identity) return deniedState();
   const supabase = createServiceClient();
-  const [attemptQuery, resultsQuery] = await Promise.all([
-    supabase.from("premium_test_attempts").select("id, started_at").eq("entitlement_id", identity.entitlementId).eq("platform_user_id", identity.platformUserId).eq("status", "started").order("started_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("premium_test_results").select("attempt_id, completed_at").eq("entitlement_id", identity.entitlementId).order("completed_at", { ascending: false }),
-  ]);
-  if (attemptQuery.error) throw attemptQuery.error;
-  if (resultsQuery.error) throw resultsQuery.error;
-  const latestResult = resultsQuery.data?.[0] ?? null;
-  const activeAttempt = attemptQuery.data;
-  const activeAttemptId = activeAttempt && (!latestResult || Date.parse(activeAttempt.started_at) > Date.parse(latestResult.completed_at)) ? activeAttempt.id : null;
-  return createPremiumAccessState(identity, resultsQuery.data?.length ?? 0, activeAttemptId, Boolean(latestResult));
+  const { data: attempt, error: attemptError } = identity.attemptId
+    ? await supabase.from("test_attempts").select("id, access_code_id, status, completed_at").eq("id", identity.attemptId).maybeSingle()
+    : { data: null, error: null };
+  if (attemptError) throw attemptError;
+  const { data: result, error: resultError } = identity.attemptId
+    ? await supabase.from("test_results").select("attempt_id").eq("access_code_id", identity.accessCodeId).eq("attempt_id", identity.attemptId).maybeSingle()
+    : { data: null, error: null };
+  if (resultError) throw resultError;
+  return createPremiumAccessState(identity, attempt as AccessAttemptRow | null, Boolean(result));
 }
 
-export async function getPremiumResultForEntitlement(identity: PlatformEntitlementIdentity): Promise<StoredResult | null> {
-  if (identity.fixture) return null;
+export async function getPremiumResultForAccess(identity: AccessSessionIdentity): Promise<StoredResult | null> {
+  if (!identity.attemptId) return null;
   const supabase = createServiceClient();
-  const { data: result, error: resultError } = await supabase.from("premium_test_results").select("attempt_id, entitlement_id, personality_type, dimension_scores, completed_at").eq("entitlement_id", identity.entitlementId).order("completed_at", { ascending: false }).limit(1).maybeSingle();
+  const { data: result, error: resultError } = await supabase
+    .from("test_results")
+    .select("attempt_id, access_code_id, personality_type, dimension_scores, completed_at")
+    .eq("access_code_id", identity.accessCodeId)
+    .eq("attempt_id", identity.attemptId)
+    .maybeSingle();
   if (resultError || !result) return null;
-  const { data: attempt, error: attemptError } = await supabase.from("premium_test_attempts").select("id, entitlement_id, platform_user_id, status, completed_at").eq("id", result.attempt_id).maybeSingle();
+  const { data: attempt, error: attemptError } = await supabase
+    .from("test_attempts")
+    .select("id, access_code_id, status, completed_at")
+    .eq("id", identity.attemptId)
+    .maybeSingle();
   if (attemptError || !attempt) return null;
-  return validateEntitledResultRecords(identity, result as EntitledResultRow, attempt as EntitledAttemptRow);
+  return validatePremiumResultRecords(identity, result as AccessResultRow, attempt as AccessAttemptRow);
 }

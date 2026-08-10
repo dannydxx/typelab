@@ -11,7 +11,6 @@ import { PreliminaryRelationshipPreview, freeScoreToPercent } from "@/components
 import { PERSONALITIES } from "./personalities";
 import { getFreePremiumCopy } from "./free-result-conversion";
 import { parseFreeStoredResult } from "./free-stored-result";
-import { getPlatformCommerceAction } from "./platform-commerce";
 import { selectFreePersonalityPreview } from "./server/free-personality-preview";
 
 describe("free result conversion experience", () => {
@@ -72,12 +71,6 @@ describe("free result conversion experience", () => {
     expect(getFreePremiumCopy(false).title).not.toContain("12题");
   });
 
-  it("only creates a platform action from an explicitly configured URL", () => {
-    expect(getPlatformCommerceAction("")).toEqual({ available: false, platform: "xiaohongshu" });
-    expect(getPlatformCommerceAction("javascript:alert(1)")).toEqual({ available: false, platform: "xiaohongshu" });
-    expect(getPlatformCommerceAction("https://example.com/xhs-product")).toMatchObject({ available: true, platform: "xiaohongshu" });
-  });
-
   it("loads a valid free StoredResult without importing premium personality copy", () => {
     expect(parseFreeStoredResult(JSON.stringify({
       attemptId: "free-attempt",
@@ -90,11 +83,11 @@ describe("free result conversion experience", () => {
   it("removes internal commerce and preserves the Premium value preview", () => {
     const homeSource = readFileSync(new URL("../components/home-experience.tsx", import.meta.url), "utf8");
     const freeResultSource = readFileSync(new URL("../components/free-result-experience.tsx", import.meta.url), "utf8");
-    expect(homeSource + freeResultSource).not.toMatch(/RedeemCodePanel|purchaseUrl|\/api\/redeem|兑换码/);
+    expect(homeSource + freeResultSource).not.toMatch(/RedeemCodePanel|purchaseUrl|\/api\/redeem|¥|￥|支付按钮/);
     expect(existsSync(new URL("../components/redeem-code-panel.tsx", import.meta.url))).toBe(false);
     expect(existsSync(new URL("../components/purchase-guide.tsx", import.meta.url))).toBe(false);
     expect(existsSync(new URL("../app/api/redeem/route.ts", import.meta.url))).toBe(false);
     expect(freeResultSource).toContain("<LockedReportPreview");
-    expect(freeResultSource).toContain("完整版通过小红书商品提供");
+    expect(freeResultSource).toContain("完整版访问码由小红书订单自动发货提供");
   });
 });
