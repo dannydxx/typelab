@@ -5,8 +5,8 @@ import {
   preparePremiumProgressForAttempt,
 } from "./free-answer-transfer";
 
-export async function startPremiumAttempt(sessionToken: string) {
-  const response = await fetch("/api/attempts/start", { method: "POST", headers: { "x-redeem-session": sessionToken } });
+export async function startPremiumAttempt() {
+  const response = await fetch("/api/attempts/start", { method: "POST", credentials: "same-origin" });
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "暂时无法开始测试，请稍后再试。");
   const attemptId = data.attemptId as string;

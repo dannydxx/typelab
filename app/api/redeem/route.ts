@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { LOCAL_DEMO_CODE, LOCAL_DEMO_SESSION, PRODUCT_CONFIG, REDEEM_CODE_PATTERN } from "@/lib/config";
+import {
+  DEMO_ATTEMPT_COOKIE_NAME,
+  DEMO_RESULT_COOKIE_NAME,
+  LOCAL_DEMO_CODE,
+  LOCAL_DEMO_SESSION,
+  PRODUCT_CONFIG,
+  REDEEM_CODE_PATTERN,
+} from "@/lib/config";
 import { createServiceClient } from "@/lib/supabase/service";
 import { apiError, unexpectedError } from "@/lib/server/http";
 import { createSessionToken } from "@/lib/server/security";
+import { getRedeemSession, setPrivateCookie, setRedeemSessionCookie } from "@/lib/server/redeem-session";
+import { getPremiumSessionState } from "@/lib/server/premium-result";
 
 const schema = z.object({ code: z.string().trim().toUpperCase() });
 
@@ -16,18 +25,19 @@ export async function POST(request: NextRequest) {
 
     if (process.env.NODE_ENV === "development" && parsed.data.code === LOCAL_DEMO_CODE) {
       const activatedAt = new Date();
-      return NextResponse.json({
+      const expiresAt = new Date(activatedAt.getTime() + PRODUCT_CONFIG.redeemValidHours * 60 * 60 * 1000).toISOString();
+      const response = NextResponse.json({
         ok: true,
-        code: LOCAL_DEMO_CODE,
-        sessionToken: LOCAL_DEMO_SESSION,
-        activatedAt: activatedAt.toISOString(),
-        expiresAt: new Date(activatedAt.getTime() + PRODUCT_CONFIG.redeemValidHours * 60 * 60 * 1000).toISOString(),
+        authenticated: true,
         canStart: true,
-        completedCount: 0,
-        maxCompletedCount: PRODUCT_CONFIG.maxCompletedTests,
-        latestResult: null,
-        demo: true,
+        hasActiveAttempt: false,
+        activeAttemptId: null,
+        hasCompletedResult: false,
       });
+      setRedeemSessionCookie(response, LOCAL_DEMO_SESSION, expiresAt);
+      setPrivateCookie(response, DEMO_ATTEMPT_COOKIE_NAME, "", new Date(0).toISOString());
+      setPrivateCookie(response, DEMO_RESULT_COOKIE_NAME, "", new Date(0).toISOString());
+      return response;
     }
 
     const supabase = createServiceClient();
@@ -49,30 +59,15 @@ export async function POST(request: NextRequest) {
     });
     if (sessionError) throw sessionError;
 
-    const { data: latest } = await supabase
-      .from("test_results")
-      .select("attempt_id, personality_type, dimension_scores, completed_at")
-      .eq("redeem_code_id", result.code_id)
-      .order("completed_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    return NextResponse.json({
+    const identity = await getRedeemSession(token);
+    if (!identity) throw new Error("SESSION_CREATION_FAILED");
+    const state = await getPremiumSessionState(identity);
+    const response = NextResponse.json({
       ok: true,
-      code: parsed.data.code,
-      sessionToken: token,
-      activatedAt: result.activated_at,
-      expiresAt: result.expires_at,
-      canStart: Number(result.completed_count) < Number(result.max_completed_count),
-      completedCount: result.completed_count,
-      maxCompletedCount: result.max_completed_count,
-      latestResult: latest ? {
-        attemptId: latest.attempt_id,
-        personalityId: latest.personality_type,
-        scores: latest.dimension_scores,
-        completedAt: latest.completed_at,
-      } : null,
+      ...state,
     });
+    setRedeemSessionCookie(response, token, result.expires_at);
+    return response;
   } catch (error) {
     return unexpectedError(error);
   }

@@ -10,8 +10,10 @@ import {
   parsePremiumProgress,
 } from "@/lib/free-answer-transfer";
 import type { AnswerValue, PremiumProgress } from "@/lib/types";
+import type { PremiumSessionState } from "@/lib/types";
 import { Questionnaire } from "./questionnaire";
 import { getUserFacingError } from "@/lib/user-facing-error";
+import { clearPremiumClientStorage } from "@/lib/premium-client-storage";
 
 const emptyProgress = (attemptId = ""): PremiumProgress => createEmptyPremiumProgress(attemptId);
 
@@ -29,25 +31,49 @@ export function TestExperience() {
       setReady(true);
       return;
     }
-    const session = localStorage.getItem(STORAGE_KEYS.session);
-    const attempt = localStorage.getItem(STORAGE_KEYS.attemptId);
-    if (!session || !attempt) { router.replace("/premium"); return; }
-    const stored = localStorage.getItem(STORAGE_KEYS.progress);
-    if (stored) {
-      const parsed = parsePremiumProgress(stored, attempt);
-      if (!parsed) {
-        localStorage.removeItem(STORAGE_KEYS.progress);
-        setProgress(emptyProgress(attempt));
-      } else if (parsed.source === "free-transfer") {
-        setProgress(parsed);
-        const transferred = parsed.answers.filter((answer) => answer !== null).length;
-        setTransferNotice(`已带入免费版的${transferred}道答案，继续完成剩余${QUESTIONS.length - transferred}题`);
-      } else if (parsed.answers.some((answer) => answer !== null)) {
-        setProgress(parsed);
-        setResumePrompt(true);
-      } else setProgress(parsed);
-    } else setProgress(emptyProgress(attempt));
-    setReady(true);
+    let cancelled = false;
+    async function loadAuthorizedAttempt() {
+      try {
+        const response = await fetch("/api/redeem/session", { credentials: "same-origin", cache: "no-store" });
+        const state = await response.json() as PremiumSessionState;
+        if (cancelled) return;
+        if (!response.ok || !state.authenticated) {
+          clearPremiumClientStorage();
+          router.replace("/premium");
+          return;
+        }
+        if (!state.hasActiveAttempt || !state.activeAttemptId) {
+          router.replace(state.hasCompletedResult ? "/premium/result" : "/premium");
+          return;
+        }
+
+        const attempt = state.activeAttemptId;
+        localStorage.setItem(STORAGE_KEYS.attemptId, attempt);
+        const stored = localStorage.getItem(STORAGE_KEYS.progress);
+        if (stored) {
+          const parsed = parsePremiumProgress(stored, attempt);
+          if (!parsed) {
+            localStorage.removeItem(STORAGE_KEYS.progress);
+            setProgress(emptyProgress(attempt));
+          } else if (parsed.source === "free-transfer") {
+            setProgress(parsed);
+            const transferred = parsed.answers.filter((answer) => answer !== null).length;
+            setTransferNotice(`已带入免费版的${transferred}道答案，继续完成剩余${QUESTIONS.length - transferred}题`);
+          } else if (parsed.answers.some((answer) => answer !== null)) {
+            setProgress(parsed);
+            setResumePrompt(true);
+          } else setProgress(parsed);
+        } else setProgress(emptyProgress(attempt));
+        setReady(true);
+      } catch {
+        if (!cancelled) {
+          clearPremiumClientStorage();
+          router.replace("/premium");
+        }
+      }
+    }
+    void loadAuthorizedAttempt();
+    return () => { cancelled = true; };
   }, [router]);
 
   function persist(next: PremiumProgress) {
@@ -73,16 +99,20 @@ export function TestExperience() {
     }
 
     try {
-      const session = localStorage.getItem(STORAGE_KEYS.session)!;
       const attemptId = localStorage.getItem(STORAGE_KEYS.attemptId)!;
       const response = await fetch("/api/attempts/complete", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-redeem-session": session },
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ attemptId, answers }),
       });
       const data = await response.json();
+      if (response.status === 401) {
+        clearPremiumClientStorage();
+        router.replace("/premium");
+        return;
+      }
       if (!response.ok) throw new Error(data.message || "结果生成失败，请稍后再试。");
-      localStorage.setItem(STORAGE_KEYS.lastResult, JSON.stringify(data.result));
       localStorage.removeItem(STORAGE_KEYS.progress);
       router.replace("/premium/result?reveal=1");
     } catch (cause) {

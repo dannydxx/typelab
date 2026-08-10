@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { calculateScores, getPersonality } from "@/lib/scoring";
 import { apiError, unexpectedError } from "@/lib/server/http";
-import { getRedeemSession } from "@/lib/server/redeem-session";
+import { getRedeemSessionFromRequest, setPrivateCookie } from "@/lib/server/redeem-session";
 import { createServiceClient } from "@/lib/supabase/service";
-import { LOCAL_DEMO_SESSION } from "@/lib/config";
+import { DEMO_ATTEMPT_COOKIE_NAME, DEMO_RESULT_COOKIE_NAME } from "@/lib/config";
+import { encodeDemoPremiumResult } from "@/lib/server/premium-result";
+import type { StoredResult } from "@/lib/types";
 
 const schema = z.object({
   attemptId: z.string().uuid(),
@@ -13,26 +15,34 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
+    const session = await getRedeemSessionFromRequest(request);
+    if (!session) return apiError("兑换会话已失效，请重新输入兑换码。", 401, "SESSION_EXPIRED");
+
     const parsed = schema.safeParse(await request.json());
     if (!parsed.success) return apiError("答题数据不完整，请返回检查。", 400, "INVALID_ANSWERS");
 
     const scores = calculateScores(parsed.data.answers);
     const personality = getPersonality(scores);
-    const sessionToken = request.headers.get("x-redeem-session");
-    if (process.env.NODE_ENV === "development" && sessionToken === LOCAL_DEMO_SESSION) {
-      return NextResponse.json({
-        ok: true,
-        idempotent: false,
-        demo: true,
-        result: { attemptId: parsed.data.attemptId, personalityId: personality.id, scores, completedAt: new Date().toISOString() },
-      });
+
+    if (session.demo) {
+      const activeAttemptId = request.cookies.get(DEMO_ATTEMPT_COOKIE_NAME)?.value;
+      if (activeAttemptId !== parsed.data.attemptId) return apiError("本次测试已失效，请重新开始。", 409, "ATTEMPT_INVALID");
+      const result: StoredResult = {
+        attemptId: parsed.data.attemptId,
+        personalityId: personality.id,
+        scores,
+        completedAt: new Date().toISOString(),
+      };
+      const response = NextResponse.json({ ok: true, idempotent: false, demo: true });
+      const expiresAt = new Date(Math.min(Date.parse(session.sessionExpiresAt), Date.parse(session.codeExpiresAt))).toISOString();
+      setPrivateCookie(response, DEMO_RESULT_COOKIE_NAME, encodeDemoPremiumResult(result), expiresAt);
+      setPrivateCookie(response, DEMO_ATTEMPT_COOKIE_NAME, "", new Date(0).toISOString());
+      return response;
     }
 
-    const session = await getRedeemSession(sessionToken);
-    if (!session) return apiError("兑换会话已失效，请重新输入兑换码。", 401, "SESSION_EXPIRED");
     const supabase = createServiceClient();
     const { data, error } = await supabase.rpc("complete_test_attempt", {
-      p_code_id: session.redeem_code_id,
+      p_code_id: session.redeemCodeId,
       p_attempt_id: parsed.data.attemptId,
       p_personality_type: personality.id,
       p_dimension_scores: scores,
@@ -47,7 +57,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       ok: true,
       idempotent: !data,
-      result: { attemptId: parsed.data.attemptId, personalityId: personality.id, scores, completedAt: new Date().toISOString() },
     });
   } catch (error) {
     return unexpectedError(error);

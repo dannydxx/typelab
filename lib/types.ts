@@ -158,3 +158,11 @@ export interface PremiumProgress {
   answers: Array<AnswerValue | null>;
   source: "premium" | "free-transfer";
 }
+
+export interface PremiumSessionState {
+  authenticated: boolean;
+  canStart: boolean;
+  hasActiveAttempt: boolean;
+  activeAttemptId: string | null;
+  hasCompletedResult: boolean;
+}

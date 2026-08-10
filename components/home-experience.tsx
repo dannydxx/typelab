@@ -3,85 +3,130 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LOCAL_DEMO_CODE, STORAGE_KEYS } from "@/lib/config";
-import type { StoredResult } from "@/lib/types";
+import type { PremiumSessionState } from "@/lib/types";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
+import {
+  clearLegacyPremiumAuthorizationStorage,
+  clearPremiumAttemptStorage,
+  clearPremiumClientStorage,
+} from "@/lib/premium-client-storage";
 import { getUserFacingError } from "@/lib/user-facing-error";
 
-type RedeemPayload = {
-  ok: boolean;
-  code: string;
-  sessionToken: string;
-  activatedAt: string;
-  canStart: boolean;
-  latestResult: StoredResult | null;
-  message?: string;
-};
+type RedeemPayload = PremiumSessionState & { ok?: boolean; message?: string };
 
 export function HomeExperience() {
   const router = useRouter();
   const [showRedeem, setShowRedeem] = useState(false);
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
   const [redeemed, setRedeemed] = useState(false);
-  const [hasSession, setHasSession] = useState(false);
+  const [sessionState, setSessionState] = useState<PremiumSessionState | null>(null);
 
-  useEffect(() => setHasSession(Boolean(localStorage.getItem(STORAGE_KEYS.session))), []);
+  useEffect(() => {
+    let cancelled = false;
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/redeem/session", { credentials: "same-origin", cache: "no-store" });
+        const state = await response.json() as PremiumSessionState;
+        if (cancelled) return;
+        if (response.ok && state.authenticated) {
+          clearLegacyPremiumAuthorizationStorage();
+          setSessionState(state);
+          setShowRedeem(false);
+        } else {
+          clearPremiumClientStorage();
+          setSessionState(null);
+        }
+      } catch {
+        if (!cancelled) setError("暂时无法确认兑换状态，请稍后再试。");
+      } finally {
+        if (!cancelled) setCheckingSession(false);
+      }
+    }
+    void loadSession();
+    return () => { cancelled = true; };
+  }, []);
 
-  async function startAttempt(sessionToken: string) {
-    await startPremiumAttempt(sessionToken);
+  async function startAttempt() {
+    await startPremiumAttempt();
     router.push("/premium/test");
   }
 
-  async function continueExisting() {
-    const storedCode = localStorage.getItem(STORAGE_KEYS.code);
-    if (!storedCode) return resetRedemption();
+  async function continueFromServerState() {
+    if (!sessionState) return setShowRedeem(true);
     setBusy(true); setError("");
     try {
-      const verifyResponse = await fetch("/api/redeem", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code: storedCode }) });
-      const verified = await verifyResponse.json() as RedeemPayload;
-      if (!verifyResponse.ok) throw new Error(verified.message || "兑换会话已失效，请重新输入兑换码。");
-      localStorage.setItem(STORAGE_KEYS.session, verified.sessionToken);
-      localStorage.setItem(STORAGE_KEYS.activatedAt, verified.activatedAt);
-      if (verified.latestResult) localStorage.setItem(STORAGE_KEYS.lastResult, JSON.stringify(verified.latestResult));
-      if (!verified.canStart && verified.latestResult) { router.push("/premium/result"); return; }
-      const progress = localStorage.getItem(STORAGE_KEYS.progress);
-      const attemptId = localStorage.getItem(STORAGE_KEYS.attemptId);
-      if (progress && attemptId) router.push("/premium/test");
-      else await startAttempt(verified.sessionToken);
+      if (sessionState.hasActiveAttempt && sessionState.activeAttemptId) {
+        localStorage.setItem(STORAGE_KEYS.attemptId, sessionState.activeAttemptId);
+        router.push("/premium/test");
+      } else if (sessionState.hasCompletedResult) {
+        router.push("/premium/result");
+      } else if (sessionState.canStart) {
+        await startAttempt();
+      } else {
+        setError("该兑换码当前没有可继续的测试。");
+      }
     } catch (cause) {
-      setHasSession(false);
-      setShowRedeem(true);
-      setCode(storedCode);
-      setError(getUserFacingError(cause, "兑换会话已失效，请重新输入兑换码。"));
+      setError(getUserFacingError(cause, "暂时无法继续测试，请稍后再试。"));
     } finally { setBusy(false); }
   }
 
-  function resetRedemption() {
-    [STORAGE_KEYS.code, STORAGE_KEYS.session, STORAGE_KEYS.activatedAt, STORAGE_KEYS.attemptId, STORAGE_KEYS.progress].forEach((key) => localStorage.removeItem(key));
-    setHasSession(false); setCode(""); setError(""); setShowRedeem(true);
+  async function resetRedemption() {
+    setBusy(true);
+    try {
+      await fetch("/api/redeem/session", { method: "DELETE", credentials: "same-origin" });
+    } finally {
+      clearPremiumClientStorage();
+      setSessionState(null);
+      setCode(""); setError(""); setShowRedeem(true); setBusy(false);
+    }
   }
 
   async function redeem(event: React.FormEvent) {
     event.preventDefault();
     setBusy(true); setError("");
     try {
-      const response = await fetch("/api/redeem", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ code }) });
+      const response = await fetch("/api/redeem", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
       const data = await response.json() as RedeemPayload;
-      if (!response.ok) throw new Error(data.message || "网络好像开了个小差，请稍后再试。");
-      localStorage.setItem(STORAGE_KEYS.code, data.code);
-      localStorage.setItem(STORAGE_KEYS.session, data.sessionToken);
-      localStorage.setItem(STORAGE_KEYS.activatedAt, data.activatedAt);
-      if (data.latestResult) localStorage.setItem(STORAGE_KEYS.lastResult, JSON.stringify(data.latestResult));
+      if (!response.ok || !data.authenticated) throw new Error(data.message || "网络好像开了个小差，请稍后再试。");
+
+      clearLegacyPremiumAuthorizationStorage();
+      const storedAttemptId = localStorage.getItem(STORAGE_KEYS.attemptId);
+      if (!data.activeAttemptId || data.activeAttemptId !== storedAttemptId) clearPremiumAttemptStorage();
+      setSessionState(data);
       setRedeemed(true);
       await new Promise((resolve) => setTimeout(resolve, 850));
-      if (!data.canStart && data.latestResult) router.push("/premium/result");
-      else await startAttempt(data.sessionToken);
+
+      if (data.hasActiveAttempt && data.activeAttemptId) {
+        localStorage.setItem(STORAGE_KEYS.attemptId, data.activeAttemptId);
+        router.push("/premium/test");
+      } else if (data.hasCompletedResult) {
+        router.push("/premium/result");
+      } else if (data.canStart) {
+        await startAttempt();
+      } else {
+        throw new Error("该兑换码当前没有可开始的测试。");
+      }
     } catch (cause) {
       setRedeemed(false);
       setError(getUserFacingError(cause, "网络好像开了个小差，请稍后再试。"));
     } finally { setBusy(false); }
   }
+
+  const primaryLabel = checkingSession
+    ? "正在确认兑换状态…"
+    : sessionState?.hasActiveAttempt
+      ? "继续上次测试"
+      : sessionState?.hasCompletedResult
+        ? "查看完整结果"
+        : "开始测试";
 
   return (
     <main className="app-shell landing page-padding">
@@ -93,10 +138,13 @@ export function HomeExperience() {
         <div className="hero-facts"><span>20道场景题</span><span>16种人格</span><span>约3分钟</span></div>
         {!showRedeem && (
           <>
-            <button className="primary-button" onClick={hasSession ? continueExisting : () => setShowRedeem(true)} disabled={busy}>
-              {hasSession ? "继续上次测试" : "开始测试"}
+            <button className="primary-button" onClick={sessionState ? continueFromServerState : () => setShowRedeem(true)} disabled={busy || checkingSession}>
+              {primaryLabel}
             </button>
-            {hasSession && <button className="text-button" style={{ width: "100%" }} onClick={resetRedemption}>使用新的兑换码</button>}
+            {sessionState?.hasCompletedResult && sessionState.canStart && !sessionState.hasActiveAttempt && (
+              <button className="text-button" style={{ width: "100%" }} onClick={startAttempt} disabled={busy}>重新测试</button>
+            )}
+            {sessionState && <button className="text-button" style={{ width: "100%" }} onClick={resetRedemption} disabled={busy}>使用新的兑换码</button>}
           </>
         )}
         {showRedeem && (

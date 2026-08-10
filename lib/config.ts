@@ -19,6 +19,10 @@ export const REDEEM_CHARACTER_POOL = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 export const LOCAL_DEMO_CODE = "LOVE-DEMV-2626";
 export const LOCAL_DEMO_SESSION = "local-demo-session-v1";
 
+export const REDEEM_SESSION_COOKIE_NAME = "love_premium_session";
+export const DEMO_ATTEMPT_COOKIE_NAME = "love_premium_demo_attempt";
+export const DEMO_RESULT_COOKIE_NAME = "love_premium_demo_result";
+
 export const STORAGE_KEYS = {
   code: "love_redeem_code",
   session: "love_redeem_session",

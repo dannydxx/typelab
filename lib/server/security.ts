@@ -1,9 +1,15 @@
 import "server-only";
 import { createHash, randomBytes, randomInt } from "crypto";
 
+export const REDEEM_SESSION_TOKEN_PREFIX = "v3_";
+
 export function createSessionToken() {
-  const token = randomBytes(32).toString("base64url");
+  const token = `${REDEEM_SESSION_TOKEN_PREFIX}${randomBytes(32).toString("base64url")}`;
   return { token, digest: hashSessionToken(token) };
+}
+
+export function isCurrentRedeemSessionToken(token: string) {
+  return token.startsWith(REDEEM_SESSION_TOKEN_PREFIX) && token.length >= REDEEM_SESSION_TOKEN_PREFIX.length + 43;
 }
 
 export function hashSessionToken(token: string) {
