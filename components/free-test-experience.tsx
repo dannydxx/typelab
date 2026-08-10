@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Questionnaire } from "./questionnaire";
 import { FREE_QUESTIONS } from "@/lib/free-questions";
 import { FREE_STORAGE_KEYS } from "@/lib/config";
+import { createFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
 import { calculateScoresForQuestions, getPersonality } from "@/lib/scoring";
 import type { AnswerValue, StoredResult } from "@/lib/types";
 
@@ -51,13 +52,16 @@ export function FreeTestExperience() {
     try {
       const scores = calculateScoresForQuestions(FREE_QUESTIONS, answers);
       const personality = getPersonality(scores);
+      const completedAt = new Date().toISOString();
       const result: StoredResult = {
         attemptId: crypto.randomUUID(),
         personalityId: personality.id,
         scores,
-        completedAt: new Date().toISOString(),
+        completedAt,
       };
+      const answerSnapshot = createFreeAnswerSnapshot(answers, completedAt);
       localStorage.setItem(FREE_STORAGE_KEYS.lastResult, JSON.stringify(result));
+      localStorage.setItem(FREE_STORAGE_KEYS.answerSnapshot, JSON.stringify(answerSnapshot));
       localStorage.removeItem(FREE_STORAGE_KEYS.progress);
       router.replace("/free/result?reveal=1");
     } catch {

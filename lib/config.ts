@@ -31,4 +31,5 @@ export const STORAGE_KEYS = {
 export const FREE_STORAGE_KEYS = {
   progress: "love_free_test_progress",
   lastResult: "love_free_last_result",
+  answerSnapshot: "love_free_answer_snapshot",
 } as const;

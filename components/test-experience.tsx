@@ -4,18 +4,23 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { QUESTIONS } from "@/lib/questions";
 import { STORAGE_KEYS } from "@/lib/config";
-import type { AnswerValue } from "@/lib/types";
+import {
+  createEmptyPremiumProgress,
+  findFirstUnansweredIndex,
+  parsePremiumProgress,
+} from "@/lib/free-answer-transfer";
+import type { AnswerValue, PremiumProgress } from "@/lib/types";
 import { Questionnaire } from "./questionnaire";
 import { getUserFacingError } from "@/lib/user-facing-error";
 
-type Progress = { current: number; answers: Array<AnswerValue | null> };
-const emptyProgress = (): Progress => ({ current: 0, answers: Array(20).fill(null) });
+const emptyProgress = (attemptId = ""): PremiumProgress => createEmptyPremiumProgress(attemptId);
 
 export function TestExperience() {
   const router = useRouter();
-  const [progress, setProgress] = useState<Progress>(emptyProgress);
+  const [progress, setProgress] = useState<PremiumProgress>(emptyProgress);
   const [ready, setReady] = useState(false);
   const [resumePrompt, setResumePrompt] = useState(false);
+  const [transferNotice, setTransferNotice] = useState("");
   const [moving, setMoving] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,15 +34,23 @@ export function TestExperience() {
     if (!session || !attempt) { router.replace("/premium"); return; }
     const stored = localStorage.getItem(STORAGE_KEYS.progress);
     if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as Progress;
-        if (parsed.answers?.some((answer) => answer !== null)) { setProgress(parsed); setResumePrompt(true); }
-      } catch { localStorage.removeItem(STORAGE_KEYS.progress); }
-    }
+      const parsed = parsePremiumProgress(stored, attempt);
+      if (!parsed) {
+        localStorage.removeItem(STORAGE_KEYS.progress);
+        setProgress(emptyProgress(attempt));
+      } else if (parsed.source === "free-transfer") {
+        setProgress(parsed);
+        const transferred = parsed.answers.filter((answer) => answer !== null).length;
+        setTransferNotice(`已带入免费版的${transferred}道答案，继续完成剩余${QUESTIONS.length - transferred}题`);
+      } else if (parsed.answers.some((answer) => answer !== null)) {
+        setProgress(parsed);
+        setResumePrompt(true);
+      } else setProgress(parsed);
+    } else setProgress(emptyProgress(attempt));
     setReady(true);
   }, [router]);
 
-  function persist(next: Progress) {
+  function persist(next: PremiumProgress) {
     setProgress(next);
     localStorage.setItem(STORAGE_KEYS.progress, JSON.stringify(next));
   }
@@ -47,12 +60,14 @@ export function TestExperience() {
     setMoving(true); setError("");
     const answers = [...progress.answers];
     answers[progress.current] = value;
-    const answered = { ...progress, answers };
+    const answered: PremiumProgress = { ...progress, answers, source: "premium" };
+    setTransferNotice("");
     persist(answered);
     await new Promise((resolve) => setTimeout(resolve, 240));
 
-    if (progress.current < QUESTIONS.length - 1) {
-      persist({ current: progress.current + 1, answers });
+    const nextUnanswered = findFirstUnansweredIndex(answers);
+    if (nextUnanswered !== -1) {
+      persist({ ...answered, current: nextUnanswered });
       setMoving(false);
       return;
     }
@@ -78,7 +93,7 @@ export function TestExperience() {
 
   if (!ready) return <main className="app-shell analysis-page"><p className="eyebrow">正在准备题目……</p></main>;
   return (
-    <Questionnaire questions={QUESTIONS} current={progress.current} answers={progress.answers} moving={moving} error={error} label="完整版 · 恋爱模式" onSelect={selectAnswer} onBack={() => progress.current > 0 && persist({ ...progress, current: progress.current - 1 })}>
+    <Questionnaire questions={QUESTIONS} current={progress.current} answers={progress.answers} moving={moving} error={error} label="完整版 · 恋爱模式" notice={transferNotice} onSelect={selectAnswer} onBack={() => progress.current > 0 && persist({ ...progress, current: progress.current - 1 })}>
       {resumePrompt && (
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resume-title">
           <div className="modal">
@@ -86,7 +101,7 @@ export function TestExperience() {
             <p>你已经回答了部分问题，可以从离开的地方继续。</p>
             <div className="modal-actions">
               <button className="primary-button" onClick={() => setResumePrompt(false)}>继续测试</button>
-              <button className="secondary-button" onClick={() => { persist(emptyProgress()); setResumePrompt(false); }}>重新开始</button>
+              <button className="secondary-button" onClick={() => { persist(emptyProgress(progress.attemptId)); setResumePrompt(false); }}>重新开始</button>
             </div>
           </div>
         </div>

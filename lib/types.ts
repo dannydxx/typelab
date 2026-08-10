@@ -143,3 +143,18 @@ export interface StoredResult {
   scores: DimensionScores;
   completedAt: string;
 }
+
+export interface FreeAnswerSnapshot {
+  version: 1;
+  questionSetVersion: "v1";
+  answersByQuestionId: Record<string, AnswerValue>;
+  completedAt: string;
+}
+
+export interface PremiumProgress {
+  version: 1;
+  attemptId: string;
+  current: number;
+  answers: Array<AnswerValue | null>;
+  source: "premium" | "free-transfer";
+}
