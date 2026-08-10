@@ -166,3 +166,21 @@ export interface PremiumSessionState {
   activeAttemptId: string | null;
   hasCompletedResult: boolean;
 }
+
+export type PersonalityVisualData = Pick<
+  Personality,
+  "id" | "name" | "animal" | "image" | "primaryColor" | "secondaryColor" | "darkColor" | "visualKeywords"
+>;
+
+export interface FreePersonalityPreview extends PersonalityVisualData {
+  tagline: string;
+  keywords: [string, string, string, string];
+  summaryHeadline: string;
+  relationshipPosition: Array<Pick<RelationshipPositionDefinition, "key" | "label" | "left" | "right">>;
+  baseHeadline: string;
+  boundaryFirstTitle: string;
+  innerOSPreview: {
+    situation: string;
+    outer: string;
+  };
+}

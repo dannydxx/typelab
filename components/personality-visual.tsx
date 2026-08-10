@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import type { Personality } from "@/lib/types";
+import type { PersonalityVisualData } from "@/lib/types";
 
-export function PersonalityVisual({ personality, className = "" }: { personality: Personality; className?: string }) {
+export function PersonalityVisual({ personality, className = "" }: { personality: PersonalityVisualData; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
     <div className={`visual-frame ${className}`} style={{

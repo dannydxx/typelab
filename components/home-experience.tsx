@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LOCAL_DEMO_CODE, STORAGE_KEYS } from "@/lib/config";
+import { STORAGE_KEYS } from "@/lib/config";
 import type { PremiumSessionState } from "@/lib/types";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 import {
@@ -11,17 +11,14 @@ import {
   clearPremiumClientStorage,
 } from "@/lib/premium-client-storage";
 import { getUserFacingError } from "@/lib/user-facing-error";
-
-type RedeemPayload = PremiumSessionState & { ok?: boolean; message?: string };
+import { RedeemCodePanel, type RedeemSuccessState } from "@/components/redeem-code-panel";
 
 export function HomeExperience() {
   const router = useRouter();
   const [showRedeem, setShowRedeem] = useState(false);
-  const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState("");
-  const [redeemed, setRedeemed] = useState(false);
   const [sessionState, setSessionState] = useState<PremiumSessionState | null>(null);
 
   useEffect(() => {
@@ -80,44 +77,26 @@ export function HomeExperience() {
     } finally {
       clearPremiumClientStorage();
       setSessionState(null);
-      setCode(""); setError(""); setShowRedeem(true); setBusy(false);
+      setError(""); setShowRedeem(true); setBusy(false);
     }
   }
 
-  async function redeem(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true); setError("");
-    try {
-      const response = await fetch("/api/redeem", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
-      });
-      const data = await response.json() as RedeemPayload;
-      if (!response.ok || !data.authenticated) throw new Error(data.message || "网络好像开了个小差，请稍后再试。");
+  async function handleRedeemed(data: RedeemSuccessState) {
+    clearLegacyPremiumAuthorizationStorage();
+    const storedAttemptId = localStorage.getItem(STORAGE_KEYS.attemptId);
+    if (!data.activeAttemptId || data.activeAttemptId !== storedAttemptId) clearPremiumAttemptStorage();
+    setSessionState(data);
 
-      clearLegacyPremiumAuthorizationStorage();
-      const storedAttemptId = localStorage.getItem(STORAGE_KEYS.attemptId);
-      if (!data.activeAttemptId || data.activeAttemptId !== storedAttemptId) clearPremiumAttemptStorage();
-      setSessionState(data);
-      setRedeemed(true);
-      await new Promise((resolve) => setTimeout(resolve, 850));
-
-      if (data.hasActiveAttempt && data.activeAttemptId) {
-        localStorage.setItem(STORAGE_KEYS.attemptId, data.activeAttemptId);
-        router.push("/premium/test");
-      } else if (data.hasCompletedResult) {
-        router.push("/premium/result");
-      } else if (data.canStart) {
-        await startAttempt();
-      } else {
-        throw new Error("该兑换码当前没有可开始的测试。");
-      }
-    } catch (cause) {
-      setRedeemed(false);
-      setError(getUserFacingError(cause, "网络好像开了个小差，请稍后再试。"));
-    } finally { setBusy(false); }
+    if (data.hasActiveAttempt && data.activeAttemptId) {
+      localStorage.setItem(STORAGE_KEYS.attemptId, data.activeAttemptId);
+      router.push("/premium/test");
+    } else if (data.hasCompletedResult) {
+      router.push("/premium/result");
+    } else if (data.canStart) {
+      await startAttempt();
+    } else {
+      throw new Error("该兑换码当前没有可开始的测试。");
+    }
   }
 
   const primaryLabel = checkingSession
@@ -145,17 +124,10 @@ export function HomeExperience() {
               <button className="text-button" style={{ width: "100%" }} onClick={startAttempt} disabled={busy}>重新测试</button>
             )}
             {sessionState && <button className="text-button" style={{ width: "100%" }} onClick={resetRedemption} disabled={busy}>使用新的兑换码</button>}
+            <p className="error-text" role="alert">{error}</p>
           </>
         )}
-        {showRedeem && (
-          <form className="redeem-panel" onSubmit={redeem}>
-            <label htmlFor="redeem-code">请输入你购买后获得的专属兑换码</label>
-            {process.env.NODE_ENV === "development" && <p className="demo-code-note">本地验收码：<button type="button" onClick={() => setCode(LOCAL_DEMO_CODE)}>{LOCAL_DEMO_CODE}</button></p>}
-            <input id="redeem-code" className="code-input" value={code} onChange={(event) => setCode(event.target.value.toUpperCase())} placeholder="请输入兑换码" autoCapitalize="characters" autoComplete="off" maxLength={14} required />
-            <button className="primary-button" type="submit" disabled={busy || redeemed}>{redeemed ? "兑换成功 · 正在开启测试…" : busy ? "正在验证…" : "验证并开始测试"}</button>
-            <p className="error-text" role="alert">{error}</p>
-          </form>
-        )}
+        {showRedeem && <RedeemCodePanel onRedeemed={handleRedeemed} />}
       </section>
       <p className="disclaimer">本测试用于娱乐、自我探索及关系沟通参考，不构成心理诊断或专业心理建议。测试答案仅用于本次结果计算，我们不收集姓名、手机号或微信。</p>
     </main>
