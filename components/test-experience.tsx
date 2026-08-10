@@ -10,7 +10,7 @@ import {
   parsePremiumProgress,
 } from "@/lib/free-answer-transfer";
 import type { AnswerValue, PremiumProgress } from "@/lib/types";
-import type { PremiumSessionState } from "@/lib/types";
+import type { PremiumAccessState } from "@/lib/types";
 import { Questionnaire } from "./questionnaire";
 import { getUserFacingError } from "@/lib/user-facing-error";
 import { clearPremiumClientStorage } from "@/lib/premium-client-storage";
@@ -34,10 +34,10 @@ export function TestExperience() {
     let cancelled = false;
     async function loadAuthorizedAttempt() {
       try {
-        const response = await fetch("/api/redeem/session", { credentials: "same-origin", cache: "no-store" });
-        const state = await response.json() as PremiumSessionState;
+        const response = await fetch("/api/premium/entitlement", { credentials: "same-origin", cache: "no-store" });
+        const state = await response.json() as PremiumAccessState;
         if (cancelled) return;
-        if (!response.ok || !state.authenticated) {
+        if (!response.ok || !state.entitled) {
           clearPremiumClientStorage();
           router.replace("/premium");
           return;
@@ -107,7 +107,7 @@ export function TestExperience() {
         body: JSON.stringify({ attemptId, answers }),
       });
       const data = await response.json();
-      if (response.status === 401) {
+      if (response.status === 401 || response.status === 403) {
         clearPremiumClientStorage();
         router.replace("/premium");
         return;

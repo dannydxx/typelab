@@ -29,7 +29,7 @@ export function FreeHomeExperience() {
         {hasProgress && <button className="text-button free-reset" onClick={startFresh}>重新开始8题体验</button>}
       </section>
       <footer className="free-landing-footer">
-        <span>无需兑换码</span><span>不收集个人信息</span><span>初步结果免费</span>
+        <span>无需注册</span><span>不收集个人信息</span><span>初步结果免费</span>
       </footer>
     </main>
   );

@@ -8,8 +8,8 @@ describe("user-facing errors", () => {
   });
 
   it("keeps Chinese API messages", () => {
-    expect(getUserFacingError(new Error("兑换会话已失效，请重新输入兑换码。"), "请求失败。"))
-      .toBe("兑换会话已失效，请重新输入兑换码。");
+    expect(getUserFacingError(new Error("当前账号暂无完整版访问权限。"), "请求失败。"))
+      .toBe("当前账号暂无完整版访问权限。");
   });
 
   it("hides technical English errors behind the supplied fallback", () => {

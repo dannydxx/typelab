@@ -1,5 +1,5 @@
 import React from "react";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
@@ -9,9 +9,9 @@ import { LockedReportPreview } from "@/components/locked-report-preview";
 import { PersonalityVisual } from "@/components/personality-visual";
 import { PreliminaryRelationshipPreview, freeScoreToPercent } from "@/components/preliminary-relationship-preview";
 import { PERSONALITIES } from "./personalities";
-import { getFreeRedeemAction, getFreeUnlockCopy } from "./free-result-conversion";
+import { getFreePremiumCopy } from "./free-result-conversion";
 import { parseFreeStoredResult } from "./free-stored-result";
-import { getConfiguredPurchaseUrl } from "./purchase-config";
+import { getPlatformCommerceAction } from "./platform-commerce";
 import { selectFreePersonalityPreview } from "./server/free-personality-preview";
 
 describe("free result conversion experience", () => {
@@ -66,24 +66,16 @@ describe("free result conversion experience", () => {
     expect(html).not.toContain(v2.innerOS[0].inner);
   });
 
-  it("starts a new premium attempt for a newly redeemed free user", () => {
-    expect(getFreeRedeemAction({ authenticated: true, canStart: true, hasActiveAttempt: false, activeAttemptId: null, hasCompletedResult: false })).toBe("start-attempt");
-  });
-
-  it("resumes a server-confirmed active attempt before creating another", () => {
-    expect(getFreeRedeemAction({ authenticated: true, canStart: true, hasActiveAttempt: true, activeAttemptId: "attempt-1", hasCompletedResult: false })).toBe("resume-attempt");
-  });
-
   it("only promises 12 remaining questions when a valid free snapshot exists", () => {
-    expect(getFreeUnlockCopy(true).title).toContain("剩余12题");
-    expect(getFreeUnlockCopy(false).title).toContain("完成20题");
-    expect(getFreeUnlockCopy(false).title).not.toContain("12题");
+    expect(getFreePremiumCopy(true).title).toContain("剩余12题");
+    expect(getFreePremiumCopy(false).title).toContain("完成20题");
+    expect(getFreePremiumCopy(false).title).not.toContain("12题");
   });
 
-  it("does not create a dead purchase link when purchaseUrl is empty or invalid", () => {
-    expect(getConfiguredPurchaseUrl("")).toBeNull();
-    expect(getConfiguredPurchaseUrl("javascript:alert(1)")).toBeNull();
-    expect(getConfiguredPurchaseUrl("https://example.com/buy")).toBe("https://example.com/buy");
+  it("only creates a platform action from an explicitly configured URL", () => {
+    expect(getPlatformCommerceAction("")).toEqual({ available: false, platform: "xiaohongshu" });
+    expect(getPlatformCommerceAction("javascript:alert(1)")).toEqual({ available: false, platform: "xiaohongshu" });
+    expect(getPlatformCommerceAction("https://example.com/xhs-product")).toMatchObject({ available: true, platform: "xiaohongshu" });
   });
 
   it("loads a valid free StoredResult without importing premium personality copy", () => {
@@ -95,10 +87,14 @@ describe("free result conversion experience", () => {
     }))).toMatchObject({ personalityId: "01" });
   });
 
-  it("reuses the same RedeemCodePanel on the premium home and free result", () => {
+  it("removes internal commerce and preserves the Premium value preview", () => {
     const homeSource = readFileSync(new URL("../components/home-experience.tsx", import.meta.url), "utf8");
     const freeResultSource = readFileSync(new URL("../components/free-result-experience.tsx", import.meta.url), "utf8");
-    expect(homeSource).toContain("<RedeemCodePanel");
-    expect(freeResultSource).toContain("<RedeemCodePanel");
+    expect(homeSource + freeResultSource).not.toMatch(/RedeemCodePanel|purchaseUrl|\/api\/redeem|兑换码/);
+    expect(existsSync(new URL("../components/redeem-code-panel.tsx", import.meta.url))).toBe(false);
+    expect(existsSync(new URL("../components/purchase-guide.tsx", import.meta.url))).toBe(false);
+    expect(existsSync(new URL("../app/api/redeem/route.ts", import.meta.url))).toBe(false);
+    expect(freeResultSource).toContain("<LockedReportPreview");
+    expect(freeResultSource).toContain("完整版通过小红书商品提供");
   });
 });

@@ -19,8 +19,8 @@ export function LockedReportPreview({ preview }: { preview: FreePersonalityPrevi
         <p className="locked-chapter-index">06 / 你的恋爱雷区</p>
         <ol>
           <li><span>01</span><strong>{preview.boundaryFirstTitle}</strong></li>
-          <li className="is-locked"><span>02</span><strong><i aria-hidden="true">◇</i> 完整版解锁</strong></li>
-          <li className="is-locked"><span>03</span><strong><i aria-hidden="true">◇</i> 完整版解锁</strong></li>
+          <li className="is-locked"><span>02</span><strong><i aria-hidden="true">◇</i> 完整版展开</strong></li>
+          <li className="is-locked"><span>03</span><strong><i aria-hidden="true">◇</i> 完整版展开</strong></li>
         </ol>
       </article>
 
@@ -28,7 +28,7 @@ export function LockedReportPreview({ preview }: { preview: FreePersonalityPrevi
         <p className="locked-chapter-index">09 / 人格恋爱系统</p>
         <h3>{preview.innerOSPreview.situation}</h3>
         <div><span>嘴上</span><p>“{preview.innerOSPreview.outer}”</p></div>
-        <div className="is-locked"><span>心里</span><p><i aria-hidden="true">◇</i> 完整版解锁</p></div>
+        <div className="is-locked"><span>心里</span><p><i aria-hidden="true">◇</i> 完整版展开</p></div>
       </article>
     </section>
   );

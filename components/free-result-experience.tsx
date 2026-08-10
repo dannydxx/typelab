@@ -7,19 +7,13 @@ import { PersonalityVisual } from "./personality-visual";
 import { ResultReveal } from "./result-reveal";
 import { PreliminaryRelationshipPreview } from "./preliminary-relationship-preview";
 import { LockedReportPreview } from "./locked-report-preview";
-import { RedeemCodePanel, type RedeemSuccessState } from "./redeem-code-panel";
-import { FREE_STORAGE_KEYS, PRODUCT_CONFIG, STORAGE_KEYS } from "@/lib/config";
+import { FREE_STORAGE_KEYS } from "@/lib/config";
 import type { FreePersonalityPreview, StoredResult } from "@/lib/types";
 import { parseFreeStoredResult } from "@/lib/free-stored-result";
-import { startPremiumAttempt } from "@/lib/start-premium-attempt";
-import {
-  clearLegacyPremiumAuthorizationStorage,
-  clearPremiumAttemptStorage,
-} from "@/lib/premium-client-storage";
-import { getConfiguredPurchaseUrl } from "@/lib/purchase-config";
-import { getFreeRedeemAction, getFreeUnlockCopy } from "@/lib/free-result-conversion";
+import { getFreePremiumCopy } from "@/lib/free-result-conversion";
 import { parseFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
 import { FreeSharePanel } from "./free-share-panel";
+import { getPlatformCommerceAction } from "@/lib/platform-commerce";
 
 const reportDirectory = [
   ["01", "人格摘要"],
@@ -41,11 +35,10 @@ export function FreeResultExperience() {
   const [preview, setPreview] = useState<FreePersonalityPreview | null>(null);
   const [step, setStep] = useState(0);
   const [revealing, setRevealing] = useState(false);
-  const [showRedeem, setShowRedeem] = useState(false);
   const [hasTransferableAnswers, setHasTransferableAnswers] = useState(false);
   const [loadError, setLoadError] = useState("");
-  const purchaseUrl = getConfiguredPurchaseUrl(PRODUCT_CONFIG.purchaseUrl);
-  const unlockCopy = getFreeUnlockCopy(hasTransferableAnswers);
+  const premiumCopy = getFreePremiumCopy(hasTransferableAnswers);
+  const commerceAction = getPlatformCommerceAction();
 
   useEffect(() => {
     let cancelled = false;
@@ -77,29 +70,6 @@ export function FreeResultExperience() {
     }
     return () => { cancelled = true; timers.forEach(window.clearTimeout); };
   }, [router]);
-
-  async function handleRedeemed(state: RedeemSuccessState) {
-    clearLegacyPremiumAuthorizationStorage();
-    const storedAttemptId = localStorage.getItem(STORAGE_KEYS.attemptId);
-    if (!state.activeAttemptId || state.activeAttemptId !== storedAttemptId) clearPremiumAttemptStorage();
-
-    const action = getFreeRedeemAction(state);
-    if (action === "resume-attempt" && state.activeAttemptId) {
-      localStorage.setItem(STORAGE_KEYS.attemptId, state.activeAttemptId);
-      router.push("/premium/test");
-      return;
-    }
-    if (action === "start-attempt") {
-      await startPremiumAttempt();
-      router.push("/premium/test");
-      return;
-    }
-    if (action === "view-result") {
-      router.push("/premium/result");
-      return;
-    }
-    throw new Error("该兑换码当前没有可开始的测试。");
-  }
 
   if (!result || (!preview && !loadError)) return <main className="app-shell analysis-page"><p className="eyebrow">正在寻找你的初步人格……</p></main>;
   if (loadError || !preview) return <main className="app-shell analysis-page page-padding"><div><p className="eyebrow">免费人格速写</p><p className="free-load-error">{loadError}</p><Link className="text-button" href="/free">返回免费版首页</Link></div></main>;
@@ -138,21 +108,15 @@ export function FreeResultExperience() {
 
       <LockedReportPreview preview={preview} />
 
-      <section id="free-unlock" className="free-unlock-panel free-unlock-v3 page-padding">
-        <p className="eyebrow">06 / 解锁完整人格报告</p>
-        <h2>{unlockCopy.title}</h2>
-        <p>{unlockCopy.description}</p>
-
-        {purchaseUrl ? (
-          <a className="primary-button free-cta" href={purchaseUrl} target="_blank" rel="noreferrer">前往购买</a>
-        ) : (
-          <div className="purchase-unavailable"><span>购买入口</span><p>当前购买链接尚未配置。已有兑换码可直接在本页继续。</p></div>
-        )}
-
-        <button className="secondary-button free-redeem-toggle" type="button" onClick={() => setShowRedeem((value) => !value)}>
-          {showRedeem ? "收起兑换码输入" : "我已有兑换码"}
-        </button>
-        {showRedeem && <RedeemCodePanel className="free-redeem-panel" onRedeemed={handleRedeemed} />}
+      <section id="free-premium" className="free-premium-panel page-padding">
+        <p className="eyebrow">06 / 完整版人格报告</p>
+        <h2>{premiumCopy.title}</h2>
+        <p>{premiumCopy.description}</p>
+        <div className="platform-commerce-note">
+          <span>小红书平台商品</span>
+          <p>完整版通过小红书商品提供，商品、价格与订单均由小红书平台管理。</p>
+        </div>
+        {commerceAction.available && <a className="secondary-button platform-commerce-link" href={commerceAction.href} target="_blank" rel="noreferrer">{commerceAction.label}</a>}
         <Link className="text-button free-retry" href="/free">重新体验免费版</Link>
       </section>
     </main>

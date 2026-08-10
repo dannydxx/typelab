@@ -1,57 +1,39 @@
-# 免费版与完整版产品架构
+# 产品架构
 
-## 路由结构
-
-```text
-/
-└── 自动转到 /premium（兼容原销售网址）
-
-/free
-├── /free/test       8题免费测试
-├── /free/result     初步人格结果
-└── /free/unlock     完整版购买引导
-
-/premium
-├── /premium/test    20题完整测试
-└── /premium/result  完整报告与高清分享卡
-
-/admin               管理员后台
-/api                 兑换、完成计数与后台安全接口
-```
-
-旧的 `/test` 与 `/result` 会自动转到对应的 `/premium` 路由，不会破坏已有浏览器收藏或旧链接。
-
-## 共享资源
+## 用户路径
 
 ```text
-lib/questions.ts             唯一20题题库
-lib/free-questions.ts        只保存免费版选中的8个题号
-lib/personalities.ts         唯一16人格数据、配色、图片路径与完整报告
-lib/scoring.ts               两个版本共用的维度计分与人格映射
-components/questionnaire.tsx 两个版本共用的答题界面
-components/personality-visual.tsx 共用人格图片与缺图占位
-components/result-reveal.tsx 共用人格揭晓界面
-components/dimension-scale.tsx 完整版维度坐标
-lib/share-card.ts            完整版高清分享卡
-public/personality/          两个版本共用的16张人格图片
+公开入口 → 免费8题 → 初步人格 → 免费分享
+                           ↓
+                  小红书平台商品权益
+                           ↓
+             Premium 20题 → 正式报告 → 高清人格卡
 ```
 
-## 状态隔离
+小红书负责商品、价格、订单和支付；本应用只验证 Premium entitlement，并保护测试、结果与正式人格视觉。
 
-免费版使用 `love_free_*` localStorage 键，只保存免费答题进度和初步结果。
+## 授权边界
 
-完整版使用 `love_*` 键，并额外要求有效兑换会话和服务端 attempt。免费版状态无法开启 `/premium/test`，也无法查看 `/premium/result`。
+- 客户端：只读取脱敏的 `PremiumAccessState`。
+- Provider：业务层只理解 `entitled`，不理解平台订单字段。
+- Adapter：`lib/server/xhs-entitlement.ts` 是未来 XHS 身份与订单验证的唯一接入点。
+- Data ownership：attempt/result 归属于服务端验证后的 entitlement 与 platform user。
+- Portrait：同时要求有效 entitlement、已完成正式测试、请求 TYPE 与正式 TYPE 一致。
 
-## 内容维护
+## 当前平台状态
 
-- 修改题目：编辑 `lib/questions.ts`。免费版会自动读取相同题目。
-- 调整免费8题选择：只修改 `lib/free-questions.ts` 的题号。
-- 修改人格名称、关键词、颜色和报告：编辑 `lib/personalities.ts`。
-- 替换人格图片：替换 `public/personality/type01.webp` 至 `type16.webp`。
-- 修改品牌、账号、购买链接及模式开关：编辑 `lib/config.ts`。
+`PENDING_XHS_PLATFORM_INTEGRATION`
 
-16 种人格的 TYPE 编号是稳定 ID，动物映射固定且互不重复。免费结果、完整结果、分享卡与后台统计都必须通过 `lib/personalities.ts` 获取当前名称和视觉信息；旧名称只允许出现在 `lib/personality-compat.ts` 的本地历史结果兼容映射中。数据库保存 `01`—`16` 的稳定 ID，因此人格名称更新不需要迁移历史数据库记录。
+当前尚无 XHS openId/unionId/platformUserId 登录上下文，也没有官方订单查询、签名回调或商品权益同步。生产环境因此默认拒绝 Premium。开发和测试只能通过服务端环境变量 fixture 模拟，不能通过 localStorage 授权。
 
-## 部署
+## 数据库迁移
 
-这是同一个 Next.js 应用，不是两套部署。按主 README 部署一次到 Vercel 后，`https://domain.com/free` 和 `https://domain.com/premium` 会同时可用。
+`supabase/migrations/20260810_xhs_native_entitlements.sql` 采用纯新增策略，不删除旧表。以下表已弃用但暂未物理删除：
+
+- `code_batches`
+- `redeem_codes`
+- `redeem_sessions`
+- `test_attempts`
+- `test_results`
+
+物理清理需要单独的数据保留、历史统计和回滚评估。

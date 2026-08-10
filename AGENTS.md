@@ -13,7 +13,7 @@ This project uses Next.js App Router, TypeScript, Supabase PostgreSQL/Auth, and 
 
 - Put routes and server endpoints in `app/`.
 - Put reusable UI components in `components/` and shared utilities and domain data in `lib/`.
-- Preserve the two product journeys: `/free` is an anonymous 8-question acquisition experience; `/premium` is the redeem-gated 20-question paid product.
+- Preserve the two product journeys: `/free` is an anonymous 8-question acquisition experience; `/premium` is a server-side XHS-entitlement-gated 20-question product. The app does not own price, payment, orders, or code redemption.
 - Keep personality data, source questions, scoring, imagery, visual components, and share-card code shared. Never fork personality content into separate free and premium copies.
 - Keep free and premium browser storage namespaces separate. Free state must never satisfy a premium route guard.
 - Keep business logic, data access, and UI presentation separated; components should not contain direct database or external-service implementation details.

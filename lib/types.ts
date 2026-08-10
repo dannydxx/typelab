@@ -159,12 +159,28 @@ export interface PremiumProgress {
   source: "premium" | "free-transfer";
 }
 
-export interface PremiumSessionState {
-  authenticated: boolean;
+export interface PremiumAccessState {
+  entitled: boolean;
   canStart: boolean;
   hasActiveAttempt: boolean;
   activeAttemptId: string | null;
   hasCompletedResult: boolean;
+}
+
+export interface PremiumEntitlement {
+  entitled: boolean;
+  source: "xiaohongshu";
+  productId?: string;
+  orderId?: string;
+  grantedAt?: string;
+}
+
+export interface PlatformEntitlementIdentity {
+  entitlementId: string;
+  platformUserId: string;
+  entitlement: PremiumEntitlement & { entitled: true };
+  maxCompletedTests: number;
+  fixture: boolean;
 }
 
 export type PersonalityPortraitData = Pick<

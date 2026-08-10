@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { DEMO_RESULT_COOKIE_NAME } from "@/lib/config";
+import { XHS_FIXTURE_RESULT_COOKIE_NAME } from "@/lib/config";
 import { apiError, unexpectedError } from "@/lib/server/http";
 import {
-  decodeDemoPremiumResult,
-  getPremiumResultForSession,
-} from "@/lib/server/premium-result";
+  decodeFixturePremiumResult,
+  getPremiumResultForEntitlement,
+} from "@/lib/server/premium-access";
 import { readPremiumPersonalityPortrait } from "@/lib/server/personality-portrait";
-import { getRedeemSessionFromRequest } from "@/lib/server/redeem-session";
+import { getPremiumEntitlementIdentityFromRequest } from "@/lib/server/xhs-entitlement";
 
 function privateResponse(response: NextResponse) {
   response.headers.set("Cache-Control", "private, no-store, max-age=0");
@@ -23,14 +23,14 @@ export async function GET(
       return privateResponse(apiError("没有找到这份人格形象。", 404, "PORTRAIT_NOT_FOUND"));
     }
 
-    const identity = await getRedeemSessionFromRequest(request);
-    if (!identity) {
-      return privateResponse(apiError("请先解锁完整版。", 401, "SESSION_EXPIRED"));
+    const identity = await getPremiumEntitlementIdentityFromRequest(request);
+    if (!identity?.entitlement.entitled) {
+      return privateResponse(apiError("当前账号暂无完整版访问权限。", 403, "ENTITLEMENT_REQUIRED"));
     }
 
-    const result = identity.demo
-      ? decodeDemoPremiumResult(request.cookies.get(DEMO_RESULT_COOKIE_NAME)?.value)
-      : await getPremiumResultForSession(identity);
+    const result = identity.fixture
+      ? decodeFixturePremiumResult(request.cookies.get(XHS_FIXTURE_RESULT_COOKIE_NAME)?.value)
+      : await getPremiumResultForEntitlement(identity);
     if (!result || result.personalityId !== type) {
       return privateResponse(apiError("这份完整人格形象不属于当前正式结果。", 403, "PORTRAIT_FORBIDDEN"));
     }
