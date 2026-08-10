@@ -125,8 +125,6 @@ export function FreeResultExperience() {
         <ol>{reportDirectory.map(([number, title]) => (
           <li key={number}><span>{number}</span><strong>{title}</strong>{number === "03" && <small>{preview.baseHeadline}</small>}</li>
         ))}</ol>
-        <a className="primary-button free-mid-cta" href="#free-unlock">解锁完整人格报告</a>
-        <p className="free-cta-note">免费8题已完成，解锁后只需继续12题</p>
       </section>
 
       <LockedReportPreview preview={preview} />

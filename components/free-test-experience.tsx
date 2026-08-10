@@ -6,6 +6,7 @@ import { Questionnaire } from "./questionnaire";
 import { FREE_QUESTIONS } from "@/lib/free-questions";
 import { FREE_STORAGE_KEYS } from "@/lib/config";
 import { createFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
+import { createLocalAttemptId } from "@/lib/local-attempt-id";
 import { calculateScoresForQuestions, getPersonality } from "@/lib/scoring";
 import type { AnswerValue, StoredResult } from "@/lib/types";
 
@@ -54,7 +55,7 @@ export function FreeTestExperience() {
       const personality = getPersonality(scores);
       const completedAt = new Date().toISOString();
       const result: StoredResult = {
-        attemptId: crypto.randomUUID(),
+        attemptId: createLocalAttemptId(),
         personalityId: personality.id,
         scores,
         completedAt,
