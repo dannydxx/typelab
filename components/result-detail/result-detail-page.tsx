@@ -46,9 +46,9 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
     <main className="app-shell result-page result-page-v2" style={style}>
       <section className="result-hero v2-hero page-padding">
         <header className="result-top"><p className="eyebrow">00 / 人格封面</p><span className="type-number">{personality.id}号人格</span></header>
-        <PersonalityVisual personality={personality} />
+        <PersonalityVisual personality={personality} mode="premium" />
         <div className="result-identity">
-          <p className="eyebrow">你的恋爱人格是</p>
+          <p className="eyebrow">正式人格 · 完整揭晓</p>
           <h1>{personality.name}</h1>
           <p className="result-tagline">{personality.tagline}</p>
           <p className="v2-short-description">{v2.shortDescription}</p>
@@ -131,8 +131,8 @@ function LegacyResultDetail({ personality, result, actionMessage, retestBusy, on
   return <main className="app-shell result-page" style={{ "--personality": personality.primaryColor } as CSSProperties}>
     <section className="result-hero page-padding">
       <header className="result-top"><p className="eyebrow">16型恋爱人格测试</p><span className="type-number">{personality.id}号人格</span></header>
-      <PersonalityVisual personality={personality} />
-      <div className="result-identity"><p className="eyebrow">你的恋爱人格是</p><h1>{personality.name}</h1><p className="result-tagline">{personality.tagline}</p><div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div></div>
+      <PersonalityVisual personality={personality} mode="premium" />
+      <div className="result-identity"><p className="eyebrow">正式人格 · 完整揭晓</p><h1>{personality.name}</h1><p className="result-tagline">{personality.tagline}</p><div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div></div>
     </section>
     <section className="dimensions page-padding">
       <p className="eyebrow">四维关系坐标</p><h2 className="section-heading">你在关系里的位置</h2>

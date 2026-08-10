@@ -6,9 +6,10 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { LockedReportPreview } from "@/components/locked-report-preview";
+import { PersonalityVisual } from "@/components/personality-visual";
 import { PreliminaryRelationshipPreview, freeScoreToPercent } from "@/components/preliminary-relationship-preview";
 import { PERSONALITIES } from "./personalities";
-import { getFreeRedeemAction } from "./free-result-conversion";
+import { getFreeRedeemAction, getFreeUnlockCopy } from "./free-result-conversion";
 import { parseFreeStoredResult } from "./free-stored-result";
 import { getConfiguredPurchaseUrl } from "./purchase-config";
 import { selectFreePersonalityPreview } from "./server/free-personality-preview";
@@ -37,6 +38,24 @@ describe("free result conversion experience", () => {
     expect(html).not.toContain(v2.relationshipPosition[0].interpretation);
   });
 
+  it("renders the public preview portrait without exposing the premium portrait endpoint", () => {
+    const html = renderToStaticMarkup(<PersonalityVisual personality={preview} mode="free-preview" />);
+    expect(html).toContain("/personality-preview/type01.webp");
+    expect(html).toContain(personality.name);
+    expect(html).toContain("初步形象预览");
+    expect(html).not.toContain("/api/premium/personality-portrait/");
+    expect(html).not.toContain(personality.image);
+  });
+
+  it("renders the formal Premium TYPE portrait independently from the free TYPE", () => {
+    const formalPersonality = PERSONALITIES[9];
+    const html = renderToStaticMarkup(<PersonalityVisual personality={formalPersonality} mode="premium" />);
+    expect(formalPersonality.id).not.toBe(personality.id);
+    expect(html).toContain(`/api/premium/personality-portrait/${formalPersonality.id}`);
+    expect(html).not.toContain(preview.previewPortrait);
+    expect(html).toContain("正式人格");
+  });
+
   it("renders only the permitted personalized locked-preview fields", () => {
     const html = renderToStaticMarkup(<LockedReportPreview preview={preview} />);
     expect(html).toContain(v2.boundaries.items[0].title);
@@ -53,6 +72,12 @@ describe("free result conversion experience", () => {
 
   it("resumes a server-confirmed active attempt before creating another", () => {
     expect(getFreeRedeemAction({ authenticated: true, canStart: true, hasActiveAttempt: true, activeAttemptId: "attempt-1", hasCompletedResult: false })).toBe("resume-attempt");
+  });
+
+  it("only promises 12 remaining questions when a valid free snapshot exists", () => {
+    expect(getFreeUnlockCopy(true).title).toContain("剩余12题");
+    expect(getFreeUnlockCopy(false).title).toContain("完成20题");
+    expect(getFreeUnlockCopy(false).title).not.toContain("12题");
   });
 
   it("does not create a dead purchase link when purchaseUrl is empty or invalid", () => {

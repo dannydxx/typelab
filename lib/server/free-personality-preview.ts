@@ -1,14 +1,17 @@
 import "server-only";
 import type { FreePersonalityPreview, Personality } from "@/lib/types";
+import { getPersonalityVisualAsset } from "@/lib/personality-visual-assets";
 
 export function selectFreePersonalityPreview(personality: Personality): FreePersonalityPreview | null {
   if (!personality.v2) return null;
+  const visualAsset = getPersonalityVisualAsset(personality.id);
+  if (!visualAsset) return null;
   const v2 = personality.v2;
   return {
     id: personality.id,
     name: personality.name,
     animal: personality.animal,
-    image: personality.image,
+    previewPortrait: visualAsset.previewPortrait,
     primaryColor: personality.primaryColor,
     secondaryColor: personality.secondaryColor,
     darkColor: personality.darkColor,

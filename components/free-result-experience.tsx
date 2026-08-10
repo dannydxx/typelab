@@ -17,7 +17,8 @@ import {
   clearPremiumAttemptStorage,
 } from "@/lib/premium-client-storage";
 import { getConfiguredPurchaseUrl } from "@/lib/purchase-config";
-import { getFreeRedeemAction } from "@/lib/free-result-conversion";
+import { getFreeRedeemAction, getFreeUnlockCopy } from "@/lib/free-result-conversion";
+import { parseFreeAnswerSnapshot } from "@/lib/free-answer-transfer";
 
 const reportDirectory = [
   ["01", "人格摘要"],
@@ -40,8 +41,10 @@ export function FreeResultExperience() {
   const [step, setStep] = useState(0);
   const [revealing, setRevealing] = useState(false);
   const [showRedeem, setShowRedeem] = useState(false);
+  const [hasTransferableAnswers, setHasTransferableAnswers] = useState(false);
   const [loadError, setLoadError] = useState("");
   const purchaseUrl = getConfiguredPurchaseUrl(PRODUCT_CONFIG.purchaseUrl);
+  const unlockCopy = getFreeUnlockCopy(hasTransferableAnswers);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +55,7 @@ export function FreeResultExperience() {
     if (!normalized) { router.replace("/free"); return; }
     localStorage.setItem(FREE_STORAGE_KEYS.lastResult, JSON.stringify(normalized));
     setResult(normalized);
+    setHasTransferableAnswers(Boolean(parseFreeAnswerSnapshot(localStorage.getItem(FREE_STORAGE_KEYS.answerSnapshot))));
 
     async function loadPreview() {
       try {
@@ -103,13 +107,15 @@ export function FreeResultExperience() {
   return (
     <main className="app-shell free-result-page" style={{ "--personality": preview.primaryColor } as React.CSSProperties}>
       <section className="free-result-hero page-padding">
-        <header className="result-top"><p className="eyebrow">01 / 人格身份</p><span className="type-number">{preview.id}号人格</span></header>
-        <PersonalityVisual personality={preview} className="free-result-visual" />
+        <header className="result-top"><p className="eyebrow">01 / 初步人格身份</p><span className="type-number">TYPE {preview.id}</span></header>
+        <PersonalityVisual personality={preview} mode="free-preview" className="free-result-visual" />
         <div className="free-result-identity">
-          <p className="eyebrow">你的初步恋爱人格倾向</p>
+          <p className="eyebrow">8题初步人格倾向</p>
           <h1>{preview.name}</h1>
+          <p className="free-provisional-type">目前最接近 TYPE {preview.id}</p>
           <p className="free-result-tagline">{preview.tagline}</p>
           <div className="trait-row">{preview.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
+          <p className="free-provisional-note">完整20题将重新校准你的关系坐标与正式人格。</p>
         </div>
       </section>
 
@@ -131,8 +137,8 @@ export function FreeResultExperience() {
 
       <section id="free-unlock" className="free-unlock-panel free-unlock-v3 page-padding">
         <p className="eyebrow">06 / 解锁完整人格报告</p>
-        <h2>继续完成剩余12题，<br />打开你的完整关系档案。</h2>
-        <p>免费答案会自动带入。完整版将重新校准四维关系坐标，并展开雷区、隐藏需求与关系使用说明。</p>
+        <h2>{unlockCopy.title}</h2>
+        <p>{unlockCopy.description}</p>
 
         {purchaseUrl ? (
           <a className="primary-button free-cta" href={purchaseUrl} target="_blank" rel="noreferrer">前往购买</a>

@@ -153,6 +153,18 @@ a { color: inherit; text-decoration: none; }
 .type-number { font: 13px var(--font-serif); letter-spacing: .13em; }
 .visual-frame { position: relative; width: 100%; aspect-ratio: 4/5; overflow: hidden; background: #d8d5ce; }
 .visual-frame img { width: 100%; height: 100%; object-fit: cover; }
+.personality-portrait { width: 100%; margin: 0; }
+.portrait-status { display: flex; align-items: baseline; justify-content: space-between; gap: 15px; margin-top: 13px; padding-top: 11px; border-top: 1px solid var(--line); }
+.portrait-status span { color: var(--personality, var(--visual-primary)); font-size: 9px; font-weight: 600; letter-spacing: .16em; }
+.portrait-status p { margin: 0; color: var(--muted); font-size: 9px; line-height: 1.6; text-align: right; }
+.personality-portrait--free-preview .visual-frame img { object-position: 52% 28%; transform: scale(1.3) translate(-3%, -2%); filter: saturate(.82) contrast(.94); }
+.portrait-preview-mask { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+.portrait-preview-mask i { position: absolute; display: block; }
+.portrait-preview-mask i:nth-child(1) { width: 49%; height: 116%; right: -15%; top: -8%; background: color-mix(in srgb, var(--visual-dark) 74%, transparent); transform: rotate(8deg); }
+.portrait-preview-mask i:nth-child(2) { width: 72%; aspect-ratio: 1; left: -28%; bottom: -36%; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: color-mix(in srgb, var(--visual-primary) 70%, transparent); backdrop-filter: blur(7px); }
+.portrait-preview-mask i:nth-child(3) { inset: 0; background: linear-gradient(150deg, rgba(246,243,236,.1) 8%, transparent 40%, rgba(31,28,25,.25) 100%); }
+.personality-portrait--free-preview .visual-fallback .visual-symbol { left: 62%; top: 42%; font-size: 142px; opacity: .66; }
+.personality-portrait--free-preview .visual-fallback .visual-caption { display: none; }
 .visual-fallback { position: absolute; inset: 0; overflow: hidden; color: #f6f3ec; background: linear-gradient(145deg, var(--visual-secondary), var(--visual-primary) 58%, var(--visual-dark)); }
 .visual-fallback::before { content: ""; position: absolute; width: 76%; aspect-ratio: 1; top: 9%; right: -20%; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; }
 .visual-fallback::after { content: ""; position: absolute; width: 62%; height: 58%; left: 19%; bottom: 0; border-radius: 48% 48% 0 0; background: rgba(246,243,236,.14); backdrop-filter: blur(2px); }
@@ -351,10 +363,12 @@ a { color: inherit; text-decoration: none; }
 .free-landing-footer { display: flex; justify-content: space-between; gap: 12px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--muted); font-size: 9px; }
 
 .free-result-page { min-height: 100vh; min-height: 100dvh; background: var(--paper-light); }
-.free-result-hero { min-height: 100vh; min-height: 100dvh; padding-top: 26px; padding-bottom: 62px; }
-.free-result-visual { width: 76%; margin: 0 0 38px auto; }
+.free-result-hero { min-height: auto; padding-top: 26px; padding-bottom: 62px; }
+.free-result-visual { width: 68%; margin: 0 0 31px auto; }
 .free-result-identity h1 { margin: 11px 0 14px; font: 400 40px/1.25 var(--font-serif); letter-spacing: .055em; }
+.free-provisional-type { margin: -4px 0 17px; color: var(--personality); font-size: 10px; letter-spacing: .12em; }
 .free-result-tagline { margin: 0; font: 400 18px/1.75 var(--font-serif); }
+.free-provisional-note { margin: 26px 0 0; padding-top: 18px; border-top: 1px solid var(--line); color: var(--muted); font-size: 10px; line-height: 1.8; }
 .free-load-error { max-width: 330px; margin: 20px 0; color: var(--muted); font-size: 13px; line-height: 1.9; }
 .free-editorial-section { padding-top: 72px; padding-bottom: 76px; border-top: 1px solid var(--line); }
 .free-editorial-section:nth-of-type(even) { background: var(--paper); }
@@ -421,7 +435,7 @@ a { color: inherit; text-decoration: none; }
 .purchase-channel strong { color: var(--ink); font-size: 15px; }
 
 @media (max-width: 390px) {
-  .free-result-visual { width: 78%; }
+  .free-result-visual { width: 70%; }
   .free-section-heading { grid-template-columns: 50px 1fr; }
   .free-section-heading > span { font-size: 37px; }
 }

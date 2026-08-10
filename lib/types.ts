@@ -167,12 +167,15 @@ export interface PremiumSessionState {
   hasCompletedResult: boolean;
 }
 
-export type PersonalityVisualData = Pick<
+export type PersonalityPortraitData = Pick<
   Personality,
-  "id" | "name" | "animal" | "image" | "primaryColor" | "secondaryColor" | "darkColor" | "visualKeywords"
+  "id" | "name" | "animal" | "primaryColor" | "secondaryColor" | "darkColor" | "visualKeywords"
 >;
 
-export interface FreePersonalityPreview extends PersonalityVisualData {
+export type PersonalityVisualData = PersonalityPortraitData & Pick<Personality, "image">;
+
+export interface FreePersonalityPreview extends PersonalityPortraitData {
+  previewPortrait: string;
   tagline: string;
   keywords: [string, string, string, string];
   summaryHeadline: string;

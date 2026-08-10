@@ -14,10 +14,13 @@ describe("free personality preview boundary", () => {
     expect(preview).toMatchObject({
       id: personality.id,
       name: personality.name,
-      image: personality.image,
+      previewPortrait: "/personality-preview/type01.webp",
       tagline: personality.tagline,
       keywords: personality.keywords,
     });
+    expect(preview).not.toHaveProperty("image");
+    expect(JSON.stringify(preview)).not.toContain(personality.image);
+    expect(JSON.stringify(preview)).not.toContain("/api/premium/personality-portrait/");
   });
 
   it("exposes summary.headline but not summary description or metrics", () => {
