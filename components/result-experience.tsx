@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PERSONALITY_BY_ID } from "@/lib/personalities";
 import { createPremiumShareCard } from "@/lib/premium-share-card";
@@ -10,6 +10,12 @@ import { ResultDetailPage } from "./result-detail/result-detail-page";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 import { getUserFacingError } from "@/lib/user-facing-error";
 import { DevPreviewBanner } from "./dev-preview-banner";
+import { PremiumShareSavePreview } from "./premium-share-save-preview";
+import {
+  prefersPremiumImageFallback,
+  sharePremiumCardFile,
+  shouldTryPremiumFileShare,
+} from "@/lib/premium-share-save";
 
 export function ResultExperience({ result, devPreview = false }: { result: StoredResult; devPreview?: boolean }) {
   const router = useRouter();
@@ -17,6 +23,12 @@ export function ResultExperience({ result, devPreview = false }: { result: Store
   const [revealing, setRevealing] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
   const [retestBusy, setRetestBusy] = useState(false);
+  const [shareCardImageUrl, setShareCardImageUrl] = useState("");
+  const cardBlobRef = useRef<Blob | null>(null);
+  const previewUrlRef = useRef("");
+  const downloadUrlRef = useRef("");
+  const downloadRevokeTimerRef = useRef<number | null>(null);
+  const saveInFlightRef = useRef(false);
   const personality = useMemo(() => PERSONALITY_BY_ID[result.personalityId] ?? null, [result.personalityId]);
 
   useEffect(() => {
@@ -30,16 +42,81 @@ export function ResultExperience({ result, devPreview = false }: { result: Store
     }
   }, []);
 
+  useEffect(() => () => {
+    if (downloadRevokeTimerRef.current !== null) window.clearTimeout(downloadRevokeTimerRef.current);
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    if (downloadUrlRef.current) URL.revokeObjectURL(downloadUrlRef.current);
+  }, []);
+
+  function closeShareCardPreview() {
+    if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+    previewUrlRef.current = "";
+    setShareCardImageUrl("");
+    setActionMessage("");
+  }
+
+  function showShareCardPreview(blob: Blob) {
+    if (!previewUrlRef.current) previewUrlRef.current = URL.createObjectURL(blob);
+    setShareCardImageUrl(previewUrlRef.current);
+    setActionMessage("图片已生成，请在预览中长按保存。");
+  }
+
+  function downloadShareCard(blob: Blob, filename: string) {
+    if (!downloadUrlRef.current) downloadUrlRef.current = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = downloadUrlRef.current;
+    anchor.download = filename;
+    anchor.click();
+    if (downloadRevokeTimerRef.current !== null) window.clearTimeout(downloadRevokeTimerRef.current);
+    downloadRevokeTimerRef.current = window.setTimeout(() => {
+      if (downloadUrlRef.current) URL.revokeObjectURL(downloadUrlRef.current);
+      downloadUrlRef.current = "";
+      downloadRevokeTimerRef.current = null;
+    }, 5000);
+  }
+
   async function saveCard() {
-    if (!personality || !result) return;
+    if (!personality || !result || saveInFlightRef.current) return;
+    saveInFlightRef.current = true;
     setActionMessage("正在生成人格艺术卡…");
     try {
-      const blob = await createPremiumShareCard(personality, result);
-      const url = URL.createObjectURL(blob);
-      const anchor = document.createElement("a"); anchor.href = url; anchor.download = `恋爱人格-${personality.name}.png`; anchor.click();
-      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setActionMessage("人格卡已生成。如未自动保存，请长按图片或在下载中查看。");
-    } catch { setActionMessage("人格卡生成失败，请稍后再试或直接截图保存。 "); }
+      const blob = cardBlobRef.current ?? await createPremiumShareCard(personality, result);
+      cardBlobRef.current = blob;
+      const userAgent = navigator.userAgent;
+      const forceFallback = devPreview && new URLSearchParams(window.location.search).get("saveFallback") === "1";
+      const needsFallback = forceFallback || prefersPremiumImageFallback(userAgent, "download" in HTMLAnchorElement.prototype);
+
+      if (!forceFallback && shouldTryPremiumFileShare(userAgent)) {
+        const shareOutcome = await sharePremiumCardFile(blob, personality.name, navigator);
+        if (shareOutcome === "shared") {
+          setActionMessage("已打开系统分享与保存面板。");
+          return;
+        }
+        if (shareOutcome === "cancelled") {
+          setActionMessage("");
+          return;
+        }
+        if (shareOutcome === "failed") {
+          showShareCardPreview(blob);
+          return;
+        }
+      }
+
+      if (needsFallback) {
+        showShareCardPreview(blob);
+        return;
+      }
+
+      downloadShareCard(blob, `恋爱人格-${personality.name}.png`);
+      setActionMessage("人格卡已生成，下载已开始。");
+    } catch (cause) {
+      if (previewUrlRef.current) URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = "";
+      setShareCardImageUrl("");
+      setActionMessage("人格卡生成失败，请稍后再试。");
+    } finally {
+      saveInFlightRef.current = false;
+    }
   }
 
   async function copyShareText() {
@@ -70,5 +147,5 @@ export function ResultExperience({ result, devPreview = false }: { result: Store
   if (!personality) return <main className="app-shell analysis-page"><p className="eyebrow">正在寻找你的人格档案……</p></main>;
   if (revealing) return <>{devPreview && <DevPreviewBanner />}<ResultReveal step={analysisStep} /></>;
 
-  return <>{devPreview && <DevPreviewBanner />}<ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push(devPreview ? "/dev/premium-preview" : "/premium")} /></>;
+  return <>{devPreview && <DevPreviewBanner />}<ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push(devPreview ? "/dev/premium-preview" : "/premium")} /><PremiumShareSavePreview imageUrl={shareCardImageUrl} personalityName={personality.name} onClose={closeShareCardPreview} onLoad={() => setActionMessage("图片已生成，请长按保存到相册。")} onError={() => { closeShareCardPreview(); setActionMessage("人格卡图片显示失败，请稍后再试。"); }} /></>;
 }
