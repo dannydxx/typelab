@@ -9,6 +9,7 @@
 /build
 /dist
 /coverage
+/exports/
 
 # local environment (never commit secrets)
 .env
