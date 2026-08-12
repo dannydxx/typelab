@@ -15,4 +15,13 @@ describe("development share visual QA", () => {
     expect(source).toContain("notFound()");
     expect(source).toContain("PERSONALITIES.map");
   });
+
+  it("provides lightweight filters and stable TYPE anchors for mobile visual review", () => {
+    const source = readFileSync(new URL("../components/share-visual-qa.tsx", import.meta.url), "utf8");
+    expect(source).toContain('type CardFilter = "all" | "free" | "premium"');
+    expect(source).toContain('id={`share-qa-type-${personality.id}`}');
+    expect(source).toContain('href="#share-qa-top"');
+    expect(source).toContain('filter !== "premium"');
+    expect(source).toContain('filter !== "free"');
+  });
 });

@@ -158,7 +158,26 @@ a { color: inherit; text-decoration: none; }
 .portrait-preview-mask i:nth-child(3) { inset: 0; background: linear-gradient(150deg, rgba(246,243,236,.1) 8%, transparent 40%, rgba(31,28,25,.25) 100%); }
 .personality-portrait--free-preview .visual-fallback .visual-symbol { left: 62%; top: 42%; font-size: 142px; opacity: .66; }
 .personality-portrait--free-preview .visual-fallback .visual-caption { display: none; }
-.dev-preview-banner { position: sticky; top: 0; z-index: 80; padding: 8px 16px; color: #f7f3eb; background: #7b3f35; font: 600 10px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; letter-spacing: .12em; text-align: center; }
+.dev-preview-banner {
+  display: grid;
+  width: 100%;
+  height: 28px;
+  padding: 0 8px;
+  place-items: center;
+  overflow: hidden;
+  color: #f7f3eb;
+  background: #7b3f35;
+  font: 600 9px/1 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  letter-spacing: .08em;
+  text-align: center;
+  white-space: nowrap;
+}
+.dev-preview-banner-compact { display: none; }
+.test-page--dev-preview { min-height: calc(100vh - 28px); min-height: calc(100dvh - 28px); }
+@media (max-width: 430px) {
+  .dev-preview-banner-full { display: none; }
+  .dev-preview-banner-compact { display: inline; }
+}
 .dev-preview-directory { max-width: 760px; margin: 0 auto; padding-top: 54px; padding-bottom: 70px; border-top: 1px solid var(--line); }
 .dev-preview-directory > .dev-preview-banner { position: static; margin-bottom: 30px; }
 .dev-preview-directory h2 { margin: 12px 0 28px; font: 400 28px/1.4 var(--font-serif); }

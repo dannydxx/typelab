@@ -18,9 +18,12 @@ type GeneratedCards = Record<string, {
   error?: string;
 }>;
 
+type CardFilter = "all" | "free" | "premium";
+
 export function ShareVisualQa({ entries }: { entries: ShareVisualQaEntry[] }) {
   const [cards, setCards] = useState<GeneratedCards>({});
   const [completed, setCompleted] = useState(0);
+  const [filter, setFilter] = useState<CardFilter>("all");
 
   useEffect(() => {
     let cancelled = false;
@@ -68,7 +71,7 @@ export function ShareVisualQa({ entries }: { entries: ShareVisualQaEntry[] }) {
   }, [entries]);
 
   return (
-    <main className={styles.page}>
+    <main className={styles.page} id="share-qa-top">
       <header className={styles.header}>
         <p>开发环境 · 分享卡视觉验收</p>
         <h1>16型人格分享卡总览</h1>
@@ -77,30 +80,62 @@ export function ShareVisualQa({ entries }: { entries: ShareVisualQaEntry[] }) {
         </div>
       </header>
 
+      <nav className={styles.qaNavigation} aria-label="分享卡验收导航">
+        <div className={styles.filterGroup} aria-label="卡片类型筛选">
+          {([
+            ["all", "全部 32 张"],
+            ["free", "仅 Free"],
+            ["premium", "仅 Premium"],
+          ] as const).map(([value, label]) => (
+            <button
+              aria-pressed={filter === value}
+              className={filter === value ? styles.filterActive : undefined}
+              key={value}
+              onClick={() => setFilter(value)}
+              type="button"
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <div className={styles.typeIndex} aria-label="TYPE 快速定位">
+          {entries.map(({ personality }) => (
+            <a href={`#share-qa-type-${personality.id}`} key={personality.id}>
+              {personality.id}
+            </a>
+          ))}
+        </div>
+      </nav>
+
       <div className={styles.typeGrid}>
         {entries.map(({ personality }) => {
           const generated = cards[personality.id];
           return (
-            <section className={styles.typeSection} key={personality.id}>
+            <section className={styles.typeSection} id={`share-qa-type-${personality.id}`} key={personality.id}>
               <div className={styles.typeHeading}>
                 <span>TYPE {personality.id}</span>
                 <h2>{personality.name}</h2>
+                <a href="#share-qa-top" aria-label="返回分享卡总览顶部">↑ 顶部</a>
               </div>
 
               {generated?.error ? (
                 <p className={styles.error}>{generated.error}</p>
               ) : (
                 <div className={styles.cardPair}>
-                  <ShareCardPreview
-                    label="Free Share Card"
-                    imageUrl={generated?.freeUrl}
-                    filename={`TYPE${personality.id}-${personality.name}-Free.png`}
-                  />
-                  <ShareCardPreview
-                    label="Premium Share Card"
-                    imageUrl={generated?.premiumUrl}
-                    filename={`TYPE${personality.id}-${personality.name}-Premium.png`}
-                  />
+                  {filter !== "premium" && (
+                    <ShareCardPreview
+                      label="Free Share Card"
+                      imageUrl={generated?.freeUrl}
+                      filename={`TYPE${personality.id}-${personality.name}-Free.png`}
+                    />
+                  )}
+                  {filter !== "free" && (
+                    <ShareCardPreview
+                      label="Premium Share Card"
+                      imageUrl={generated?.premiumUrl}
+                      filename={`TYPE${personality.id}-${personality.name}-Premium.png`}
+                    />
+                  )}
                 </div>
               )}
             </section>

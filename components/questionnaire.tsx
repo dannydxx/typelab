@@ -10,6 +10,7 @@ export function Questionnaire({
   error,
   label,
   notice,
+  devPreview = false,
   onSelect,
   onBack,
   children,
@@ -21,13 +22,14 @@ export function Questionnaire({
   error: string;
   label: string;
   notice?: string;
+  devPreview?: boolean;
   onSelect: (value: AnswerValue) => void;
   onBack: () => void;
   children?: React.ReactNode;
 }) {
   const question = questions[current];
   return (
-    <main className="app-shell test-page page-padding">
+    <main className={`app-shell test-page page-padding${devPreview ? " test-page--dev-preview" : ""}`}>
       <header>
         <div className="test-head"><p className="eyebrow">{label}</p><span className="type-number">{String(current + 1).padStart(2, "0")} / {String(questions.length).padStart(2, "0")}</span></div>
         <div className="progress-track"><div className="progress-fill" style={{ width: `${((current + 1) / questions.length) * 100}%` }} /></div>

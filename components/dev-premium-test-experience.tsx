@@ -41,6 +41,7 @@ export function DevPremiumTestExperience() {
         error=""
         label="完整版 · 恋爱模式"
         notice="当前为内存fixture：不会验证访问码、写入数据库或生成正式结果。"
+        devPreview
         onSelect={selectAnswer}
         onBack={() => current > 0 && setCurrent(current - 1)}
       />

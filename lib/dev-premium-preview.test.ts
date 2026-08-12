@@ -17,6 +17,16 @@ describe("Premium UI development preview", () => {
     const source = readFileSync(new URL("../components/dev-premium-test-experience.tsx", import.meta.url), "utf8");
     expect(source).toContain("Array(QUESTIONS.length).fill(null)");
     expect(source).not.toMatch(/fetch\(|localStorage|\/api\/|AccessCode|startPremiumAttempt|calculateScores/);
+    expect(source).toContain("devPreview");
+  });
+
+  it("keeps the development banner compact and removes its height from the preview questionnaire", () => {
+    const bannerSource = readFileSync(new URL("../components/dev-preview-banner.tsx", import.meta.url), "utf8");
+    const styles = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+    expect(bannerSource).toContain("DEV / VISUAL QA · 仅预览");
+    expect(styles).toContain("height: 28px");
+    expect(styles).toContain(".test-page--dev-preview");
+    expect(styles).not.toMatch(/\.dev-preview-banner\s*\{[\s\S]*?position:\s*sticky/);
   });
 
   it("removes query preview bypasses from the formal Premium test and result paths", () => {
