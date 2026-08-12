@@ -9,8 +9,9 @@ import { ResultReveal } from "./result-reveal";
 import { ResultDetailPage } from "./result-detail/result-detail-page";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 import { getUserFacingError } from "@/lib/user-facing-error";
+import { DevPreviewBanner } from "./dev-preview-banner";
 
-export function ResultExperience({ result }: { result: StoredResult }) {
+export function ResultExperience({ result, devPreview = false }: { result: StoredResult; devPreview?: boolean }) {
   const router = useRouter();
   const [analysisStep, setAnalysisStep] = useState(4);
   const [revealing, setRevealing] = useState(false);
@@ -49,9 +50,8 @@ export function ResultExperience({ result }: { result: StoredResult }) {
   }
 
   async function retest() {
-    const params = new URLSearchParams(window.location.search);
-    if (process.env.NODE_ENV === "development" && params.get("preview")) {
-      router.push("/premium");
+    if (devPreview) {
+      router.push("/dev/premium-preview/test");
       return;
     }
 
@@ -68,7 +68,7 @@ export function ResultExperience({ result }: { result: StoredResult }) {
   }
 
   if (!personality) return <main className="app-shell analysis-page"><p className="eyebrow">正在寻找你的人格档案……</p></main>;
-  if (revealing) return <ResultReveal step={analysisStep} />;
+  if (revealing) return <>{devPreview && <DevPreviewBanner />}<ResultReveal step={analysisStep} /></>;
 
-  return <ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push("/premium")} />;
+  return <>{devPreview && <DevPreviewBanner />}<ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push(devPreview ? "/dev/premium-preview" : "/premium")} /></>;
 }

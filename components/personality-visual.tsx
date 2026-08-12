@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import type { PersonalityPortraitData } from "@/lib/types";
-import { getPersonalityVisualAsset } from "@/lib/personality-visual-assets";
+import { getPersonalityVisualAsset, getPremiumPortraitUrl } from "@/lib/personality-visual-assets";
 
 type PersonalityVisualProps = {
   personality: PersonalityPortraitData & { previewPortrait?: string };
@@ -13,12 +13,23 @@ type PersonalityVisualProps = {
 
 export function PersonalityVisual({ personality, mode, className = "" }: PersonalityVisualProps) {
   const [failed, setFailed] = useState(false);
+  const [previewPathname, setPreviewPathname] = useState<string | null>(null);
   const visualAsset = getPersonalityVisualAsset(personality.id);
-  const imageSource = mode === "free-preview"
-    ? personality.previewPortrait ?? visualAsset?.previewPortrait
-    : visualAsset?.premiumPortrait;
+  const waitsForDevelopmentPreview = mode === "premium"
+    && process.env.NODE_ENV === "development"
+    && previewPathname === null;
+  const imageSource = waitsForDevelopmentPreview
+    ? null
+    : mode === "free-preview"
+      ? personality.previewPortrait ?? visualAsset?.previewPortrait
+      : getPremiumPortraitUrl(personality.id, previewPathname ?? "");
 
   useEffect(() => setFailed(false), [imageSource]);
+  useEffect(() => {
+    if (mode === "premium" && process.env.NODE_ENV === "development") {
+      setPreviewPathname(window.location.pathname);
+    }
+  }, [mode, personality.id]);
 
   return (
     <figure className={`personality-portrait personality-portrait--${mode} ${className}`}>

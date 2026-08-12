@@ -8,8 +8,9 @@ import { startPremiumAttempt } from "@/lib/start-premium-attempt";
 import { clearPremiumAttemptStorage } from "@/lib/premium-client-storage";
 import { getUserFacingError } from "@/lib/user-facing-error";
 import { AccessCodePanel } from "./access-code-panel";
+import { DevPreviewBanner } from "./dev-preview-banner";
 
-export function HomeExperience() {
+export function HomeExperience({ devPreview = false }: { devPreview?: boolean }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [checkingAccess, setCheckingAccess] = useState(true);
@@ -27,12 +28,16 @@ export function HomeExperience() {
   }, []);
 
   useEffect(() => {
+    if (devPreview) {
+      setCheckingAccess(false);
+      return;
+    }
     let cancelled = false;
     loadAccess().catch(() => {
       if (!cancelled) { setError("暂时无法确认完整版访问状态，请稍后再试。"); setCheckingAccess(false); }
     });
     return () => { cancelled = true; };
-  }, [loadAccess]);
+  }, [devPreview, loadAccess]);
 
   async function continueWithState(state = access) {
     if (!state?.authorized) return;
@@ -66,7 +71,7 @@ export function HomeExperience() {
         : "开始完整测试";
 
   return (
-    <main className="app-shell landing page-padding">
+    <>{devPreview && <DevPreviewBanner />}<main className="app-shell landing page-padding">
       <nav className="landing-nav"><p className="eyebrow">16型恋爱人格测试</p><span className="landing-index">完整版</span></nav>
       <section className="hero premium-entry-hero">
         <p className="eyebrow">恋爱动物人格 · 完整版</p>
@@ -76,7 +81,9 @@ export function HomeExperience() {
         <ul className="premium-content-list">
           {["恋爱底色", "心动机制", "安全感机制", "恋爱雷区", "隐藏需求", "人格恋爱系统", "关系建议", "完整人格形象"].map((item) => <li key={item}>○ {item}</li>)}
         </ul>
-        {access?.authorized ? (
+        {devPreview ? (
+          <button className="primary-button" onClick={() => router.push("/dev/premium-preview/test")}>预览完整测试</button>
+        ) : access?.authorized ? (
           <button className="primary-button" onClick={() => continueWithState()} disabled={busy || checkingAccess}>{primaryLabel}</button>
         ) : checkingAccess ? (
           <p className="premium-access-checking">正在确认访问状态……</p>
@@ -86,6 +93,6 @@ export function HomeExperience() {
         <p className="error-text" role="alert">{error}</p>
       </section>
       <p className="disclaimer">访问码由小红书订单自动发货提供。本网站不展示价格、不创建订单，也不处理付款。</p>
-    </main>
+    </main></>
   );
 }

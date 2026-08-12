@@ -158,6 +158,18 @@ a { color: inherit; text-decoration: none; }
 .portrait-preview-mask i:nth-child(3) { inset: 0; background: linear-gradient(150deg, rgba(246,243,236,.1) 8%, transparent 40%, rgba(31,28,25,.25) 100%); }
 .personality-portrait--free-preview .visual-fallback .visual-symbol { left: 62%; top: 42%; font-size: 142px; opacity: .66; }
 .personality-portrait--free-preview .visual-fallback .visual-caption { display: none; }
+.dev-preview-banner { position: sticky; top: 0; z-index: 80; padding: 8px 16px; color: #f7f3eb; background: #7b3f35; font: 600 10px/1.5 -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; letter-spacing: .12em; text-align: center; }
+.dev-preview-directory { max-width: 760px; margin: 0 auto; padding-top: 54px; padding-bottom: 70px; border-top: 1px solid var(--line); }
+.dev-preview-directory > .dev-preview-banner { position: static; margin-bottom: 30px; }
+.dev-preview-directory h2 { margin: 12px 0 28px; font: 400 28px/1.4 var(--font-serif); }
+.dev-preview-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.dev-preview-links a { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 14px 0; color: var(--ink); border-bottom: 1px solid var(--line); text-decoration: none; }
+.dev-preview-links a:nth-child(odd) { padding-right: 18px; }
+.dev-preview-links a:nth-child(even) { padding-left: 18px; border-left: 1px solid var(--line); }
+.dev-preview-links span { color: var(--muted); font-size: 9px; letter-spacing: .1em; }
+.dev-preview-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 28px; }
+.dev-preview-actions a { padding: 14px 12px; color: #f7f3eb; background: var(--ink); font-size: 12px; text-align: center; text-decoration: none; }
+@media (max-width: 430px) { .dev-preview-links, .dev-preview-actions { grid-template-columns: 1fr; } .dev-preview-links a:nth-child(n) { padding-right: 0; padding-left: 0; border-left: 0; } }
 .visual-fallback { position: absolute; inset: 0; overflow: hidden; color: #f6f3ec; background: linear-gradient(145deg, var(--visual-secondary), var(--visual-primary) 58%, var(--visual-dark)); }
 .visual-fallback::before { content: ""; position: absolute; width: 76%; aspect-ratio: 1; top: 9%; right: -20%; border: 1px solid rgba(255,255,255,.45); border-radius: 50%; }
 .visual-fallback::after { content: ""; position: absolute; width: 62%; height: 58%; left: 19%; bottom: 0; border-radius: 48% 48% 0 0; background: rgba(246,243,236,.14); backdrop-filter: blur(2px); }

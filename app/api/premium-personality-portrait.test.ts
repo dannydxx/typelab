@@ -11,7 +11,7 @@ import { GET } from "./premium/personality-portrait/[type]/route";
 
 const identity = { sessionId: "session-1", accessCodeId: "code-1", sessionExpiresAt: "2026-08-13T12:00:00.000Z", accessExpiresAt: "2026-08-13T12:00:00.000Z", attemptId: "attempt-1" };
 const result = { attemptId: "attempt-1", personalityId: "09", scores: { security: 2, closeness: 3, expression: 1, conflict: -2 }, completedAt: "2026-08-10T12:00:00.000Z" };
-const requestPortrait = (type: string) => GET(new NextRequest(`http://localhost/api/premium/personality-portrait/${type}`), { params: Promise.resolve({ type }) });
+const requestPortrait = (type: string, search = "") => GET(new NextRequest(`http://localhost/api/premium/personality-portrait/${type}${search}`), { params: Promise.resolve({ type }) });
 
 describe("premium personality portrait Access Session authorization", () => {
   beforeEach(() => {
@@ -47,5 +47,12 @@ describe("premium personality portrait Access Session authorization", () => {
     mocks.readPortrait.mockResolvedValue(null);
     const response = await requestPortrait("09");
     expect(response.status).toBe(404);
+  });
+
+  it("does not accept a preview query as an authorization bypass", async () => {
+    const response = await requestPortrait("09", "?preview=09");
+    expect(response.status).toBe(403);
+    expect(mocks.getSession).toHaveBeenCalled();
+    expect(mocks.readPortrait).not.toHaveBeenCalled();
   });
 });

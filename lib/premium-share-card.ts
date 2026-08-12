@@ -1,5 +1,5 @@
 import { PRODUCT_CONFIG } from "./config";
-import { getPersonalityVisualAsset } from "./personality-visual-assets";
+import { getPremiumPortraitUrl } from "./personality-visual-assets";
 import { getVisibleBrandAccount } from "./public-entry";
 import { scoreToPercent } from "./scoring";
 import {
@@ -16,7 +16,8 @@ export async function createPremiumShareCard(personality: Personality, result: S
   const { canvas, ctx } = createShareCanvas();
   ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, 1080, 1440);
 
-  const fullPortrait = getPersonalityVisualAsset(personality.id)?.premiumPortrait ?? personality.image;
+  const pathname = typeof window === "undefined" ? "" : window.location.pathname;
+  const fullPortrait = getPremiumPortraitUrl(personality.id, pathname) ?? personality.image;
   const image = await loadImage(fullPortrait);
   if (image) drawCoverImage(ctx, image, 70, 72, 940, 760);
   else drawPortraitFallback(ctx, personality.id, personality.secondaryColor, personality.primaryColor, personality.darkColor, 70, 72, 940, 760);

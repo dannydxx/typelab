@@ -18,3 +18,11 @@ export const PERSONALITY_VISUALS = Object.fromEntries(
 export function getPersonalityVisualAsset(personalityId: string) {
   return PERSONALITY_VISUALS[personalityId] ?? null;
 }
+
+export function getPremiumPortraitUrl(personalityId: string, pathname = "") {
+  const portraitUrl = getPersonalityVisualAsset(personalityId)?.premiumPortrait ?? null;
+  if (!portraitUrl || process.env.NODE_ENV !== "development") return portraitUrl;
+  return pathname.startsWith("/dev/")
+    ? `/dev/api/personality-portrait/${personalityId}`
+    : portraitUrl;
+}

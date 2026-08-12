@@ -27,10 +27,6 @@ export function TestExperience() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (process.env.NODE_ENV === "development" && new URLSearchParams(window.location.search).get("preview") === "1") {
-      setReady(true);
-      return;
-    }
     let cancelled = false;
     async function loadAuthorizedAttempt() {
       try {

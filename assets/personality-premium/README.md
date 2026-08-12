@@ -4,4 +4,6 @@
 
 该目录不属于 `public/`，图片只能通过 `/api/premium/personality-portrait/[type]` 在有效 HttpOnly Premium 会话、且正式测试结果与 TYPE 一致时读取。
 
-当前尚未提供正式IP图片时，Premium结果页会显示完整构图的品牌色艺术占位，不会生成或提交假图片。
+当前已接入 `type01.webp` 至 `type16.webp`。这些文件与 `assets/personality-source/v3/` 中经人工确认的V3源图保持一致。
+
+不要把本目录的文件复制到 `public/`。免费版只能使用单独生成的低清朦胧预览资源。
