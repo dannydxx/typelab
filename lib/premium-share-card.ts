@@ -12,6 +12,78 @@ import {
 } from "./share-card";
 import type { Personality, StoredResult } from "./types";
 
+const PREMIUM_TAGLINE_MAX_WIDTH = 900;
+const PREMIUM_TAGLINE_LETTER_SPACING = 1;
+const PREMIUM_TAGLINE_FONT_SIZES = [34, 32, 30, 28, 26, 24] as const;
+const OPENING_PUNCTUATION = new Set(Array.from("“‘（《〈【〔［｛"));
+const CLOSING_PUNCTUATION = new Set(Array.from("，。！？；：、）》〉】〕］｝”’…"));
+
+export type PremiumTaglineLayout = {
+  fontSize: number;
+  lines: string[];
+  lineHeight: number;
+  firstBaseline: number;
+  traitTop: number;
+};
+
+export function createPremiumTaglineLayout(
+  text: string,
+  measureText: (value: string, fontSize: number) => number,
+): PremiumTaglineLayout {
+  const measuredWidth = (value: string, fontSize: number) => (
+    measureText(value, fontSize) + Math.max(0, Array.from(value).length - 1) * PREMIUM_TAGLINE_LETTER_SPACING
+  );
+
+  for (const fontSize of PREMIUM_TAGLINE_FONT_SIZES.slice(0, 2)) {
+    if (measuredWidth(text, fontSize) <= PREMIUM_TAGLINE_MAX_WIDTH) {
+      return { fontSize, lines: [text], lineHeight: 0, firstBaseline: 1052, traitTop: 1090 };
+    }
+  }
+
+  for (const fontSize of PREMIUM_TAGLINE_FONT_SIZES.slice(1)) {
+    const lines = wrapPremiumTagline(text, (value) => measuredWidth(value, fontSize));
+    if (lines && lines.length <= 2) {
+      return { fontSize, lines, lineHeight: 38, firstBaseline: 1044, traitTop: 1112 };
+    }
+  }
+
+  throw new Error("PREMIUM_TAGLINE_TOO_LONG");
+}
+
+function wrapPremiumTagline(text: string, measureText: (value: string) => number) {
+  const lines: string[] = [];
+  let line = "";
+
+  for (const character of Array.from(text)) {
+    const candidate = line + character;
+    if (!line || measureText(candidate) <= PREMIUM_TAGLINE_MAX_WIDTH) {
+      line = candidate;
+      continue;
+    }
+
+    let nextLine = character;
+    const lineCharacters = Array.from(line);
+    const trailingEnglishWord = /[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*$/.exec(line);
+    if (/[A-Za-z0-9]/.test(character) && trailingEnglishWord?.index && lineCharacters.length > 1) {
+      nextLine = `${lineCharacters.splice(trailingEnglishWord.index).join("")}${character}`;
+    } else if (CLOSING_PUNCTUATION.has(character) && lineCharacters.length > 1) {
+      nextLine = `${lineCharacters.pop()}${character}`;
+    }
+    while (lineCharacters.length > 1 && OPENING_PUNCTUATION.has(lineCharacters.at(-1) ?? "")) {
+      nextLine = `${lineCharacters.pop()}${nextLine}`;
+    }
+
+    lines.push(lineCharacters.join(""));
+    if (lines.length >= 2) return null;
+    line = nextLine;
+  }
+
+  if (line) lines.push(line);
+  return lines.length <= 2 && lines.every((value) => measureText(value) <= PREMIUM_TAGLINE_MAX_WIDTH)
+    ? lines
+    : null;
+}
+
 export async function createPremiumShareCard(personality: Personality, result: StoredResult) {
   const { canvas, ctx } = createShareCanvas();
   ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, 1080, 1440);
@@ -26,14 +98,19 @@ export async function createPremiumShareCard(personality: Personality, result: S
   ctx.fillStyle = "#f8f5ee"; ctx.textAlign = "left"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "4px"; ctx.fillText(`16型恋爱人格测试 · ${personality.id}号人格`, 102, 111);
   ctx.fillStyle = "#77736c"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("我的正式恋爱人格", 72, 898);
   ctx.fillStyle = "#242321"; ctx.font = '76px "Songti SC", serif'; ctx.letterSpacing = "5px"; ctx.fillText(personality.name, 68, 995);
-  ctx.fillStyle = "#4b4944"; ctx.font = '34px "Songti SC", serif'; ctx.letterSpacing = "1px"; ctx.fillText(personality.tagline, 70, 1052);
+  const taglineLayout = createPremiumTaglineLayout(personality.tagline, (value, fontSize) => {
+    ctx.font = `${fontSize}px "Songti SC", serif`;
+    return ctx.measureText(value).width;
+  });
+  ctx.fillStyle = "#4b4944"; ctx.font = `${taglineLayout.fontSize}px "Songti SC", serif`; ctx.letterSpacing = "1px";
+  taglineLayout.lines.forEach((line, index) => ctx.fillText(line, 70, taglineLayout.firstBaseline + index * taglineLayout.lineHeight));
 
   let traitX = 70;
   ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
   personality.keywords.forEach((trait) => {
     const width = ctx.measureText(trait).width + 38;
-    ctx.fillStyle = personality.secondaryColor; roundedRect(ctx, traitX, 1090, width, 46, 4);
-    ctx.fillStyle = personality.darkColor; ctx.fillText(trait, traitX + 19, 1122); traitX += width + 14;
+    ctx.fillStyle = personality.secondaryColor; roundedRect(ctx, traitX, taglineLayout.traitTop, width, 46, 4);
+    ctx.fillStyle = personality.darkColor; ctx.fillText(trait, traitX + 19, taglineLayout.traitTop + 32); traitX += width + 14;
   });
 
   const dimensions = [
