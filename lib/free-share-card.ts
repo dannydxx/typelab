@@ -2,7 +2,6 @@ import { PRODUCT_CONFIG } from "./config";
 import { getPublicEntryUrl } from "./public-entry";
 import {
   canvasToPngBlob,
-  createQrImage,
   createShareCanvas,
   drawCoverImage,
   drawPortraitFallback,
@@ -11,6 +10,9 @@ import {
   wrapCanvasText,
 } from "./share-card";
 import type { FreePersonalityPreview } from "./types";
+
+export const FREE_SHARE_CARD_SIZE = { width: 1080, height: 1920 } as const;
+export const FREE_SHARE_PORTRAIT_FRAME = { x: 72, y: 72, width: 936, height: 1248 } as const;
 
 export interface FreeShareCardModel {
   id: string;
@@ -36,38 +38,40 @@ export function createFreeShareCardModel(preview: FreePersonalityPreview, config
 
 export async function createFreeShareCard(preview: FreePersonalityPreview, configuredUrl = PRODUCT_CONFIG.siteUrl) {
   const model = createFreeShareCardModel(preview, configuredUrl);
-  const { canvas, ctx } = createShareCanvas();
-  ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, 1080, 1440);
+  const { canvas, ctx } = createShareCanvas(FREE_SHARE_CARD_SIZE.width, FREE_SHARE_CARD_SIZE.height);
+  ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, FREE_SHARE_CARD_SIZE.width, FREE_SHARE_CARD_SIZE.height);
 
   const image = await loadImage(model.portraitUrl);
-  if (image) drawCoverImage(ctx, image, 70, 72, 940, 620);
-  else drawPortraitFallback(ctx, model.id, preview.secondaryColor, preview.primaryColor, preview.darkColor, 70, 72, 940, 620);
-  ctx.fillStyle = "rgba(243,240,233,.2)"; ctx.fillRect(70, 72, 940, 620);
-  ctx.fillStyle = "rgba(23,23,22,.72)"; ctx.fillRect(70, 72, 940, 60);
-  ctx.fillStyle = "#f8f5ee"; ctx.textAlign = "left"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "4px"; ctx.fillText(`TYPE ${model.id} · 8题初步人格`, 102, 111);
+  const portrait = FREE_SHARE_PORTRAIT_FRAME;
+  if (image) drawCoverImage(ctx, image, portrait.x, portrait.y, portrait.width, portrait.height);
+  else drawPortraitFallback(ctx, model.id, preview.secondaryColor, preview.primaryColor, preview.darkColor, portrait.x, portrait.y, portrait.width, portrait.height);
 
-  ctx.fillStyle = "#242321"; ctx.font = '72px "Songti SC", serif'; ctx.letterSpacing = "4px"; ctx.fillText(model.name, 70, 790);
-  ctx.fillStyle = "#55514b"; ctx.font = '31px "Songti SC", serif'; ctx.letterSpacing = "1px";
-  const taglineBottom = wrapCanvasText(ctx, model.tagline, 72, 854, 880, 48, 2);
+  ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "2px";
+  ctx.textAlign = "left"; ctx.fillText(`TYPE ${model.id} · 8题初步人格`, 72, 48);
+  ctx.textAlign = "right"; ctx.fillText("TypeLab 16型恋爱人格测试", 1008, 48);
+
+  ctx.textAlign = "left"; ctx.fillStyle = "#242321"; ctx.font = '72px "Songti SC", serif'; ctx.letterSpacing = "5px"; ctx.fillText(model.name, 70, 1410);
+  ctx.fillStyle = "#4b4944"; ctx.font = '34px "Songti SC", serif'; ctx.letterSpacing = "1px";
+  const taglineBottom = wrapCanvasText(ctx, model.tagline, 70, 1478, 900, 40, 2);
 
   let traitX = 70;
-  ctx.font = '23px -apple-system, "PingFang SC", sans-serif';
+  const traitTop = taglineBottom + 12;
+  ctx.font = '24px -apple-system, "PingFang SC", sans-serif';
   model.keywords.forEach((trait) => {
-    const width = ctx.measureText(trait).width + 36;
-    ctx.fillStyle = preview.secondaryColor; roundedRect(ctx, traitX, taglineBottom + 22, width, 44, 4);
-    ctx.fillStyle = preview.darkColor; ctx.fillText(trait, traitX + 18, taglineBottom + 53); traitX += width + 12;
+    const width = ctx.measureText(trait).width + 38;
+    ctx.fillStyle = preview.secondaryColor; roundedRect(ctx, traitX, traitTop, width, 46, 4);
+    ctx.fillStyle = preview.darkColor; ctx.fillText(trait, traitX + 19, traitTop + 32); traitX += width + 14;
   });
 
-  ctx.fillStyle = preview.primaryColor; ctx.fillRect(70, 1052, 2, 116);
-  ctx.fillStyle = "#242321"; ctx.font = '28px "Songti SC", serif';
-  wrapCanvasText(ctx, model.summaryHeadline, 102, 1092, 650, 44, 2);
-  ctx.fillStyle = "#77736c"; ctx.font = '17px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText("完整20题将重新校准正式人格", 102, 1170);
+  ctx.fillStyle = "#97928a"; ctx.font = '14px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("初步判断", 70, 1660);
+  ctx.fillStyle = "#5f5b55"; ctx.font = '24px "Songti SC", serif'; ctx.letterSpacing = ".5px";
+  wrapCanvasText(ctx, model.summaryHeadline, 70, 1700, 900, 34, 2);
 
-  const qr = await createQrImage(model.publicUrl, preview.darkColor);
-  if (qr) ctx.drawImage(qr, 846, 1040, 164, 164);
-  ctx.fillStyle = "#242321"; ctx.font = '25px "Songti SC", serif'; ctx.fillText("测测你的恋爱人格", 70, 1304);
-  ctx.fillStyle = "#77736c"; ctx.font = '17px -apple-system, "PingFang SC", sans-serif'; ctx.fillText(model.publicUrl, 70, 1342);
-  ctx.textAlign = "right"; ctx.fillText(`${PRODUCT_CONFIG.brandName} · ${PRODUCT_CONFIG.testName}`, 1010, 1342);
+  ctx.fillStyle = preview.primaryColor; ctx.fillRect(70, 1774, 2, 78);
+  ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
+  ctx.fillText("当前为8题初步人格 · 完成20题后将重新校准正式人格", 96, 1802);
+  ctx.fillText("解锁正式人格、完整形象与完整关系档案", 96, 1840);
+  ctx.textAlign = "right"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
+  ctx.fillText("小红书 · TypeLab 类型志", 1010, 1888);
   return canvasToPngBlob(canvas);
 }

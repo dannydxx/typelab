@@ -9,9 +9,10 @@ type PersonalityVisualProps = {
   personality: PersonalityPortraitData & { previewPortrait?: string };
   mode: "free-preview" | "premium";
   className?: string;
+  showStatus?: boolean;
 };
 
-export function PersonalityVisual({ personality, mode, className = "" }: PersonalityVisualProps) {
+export function PersonalityVisual({ personality, mode, className = "", showStatus = true }: PersonalityVisualProps) {
   const [failed, setFailed] = useState(false);
   const [previewPathname, setPreviewPathname] = useState<string | null>(null);
   const visualAsset = getPersonalityVisualAsset(personality.id);
@@ -48,10 +49,10 @@ export function PersonalityVisual({ personality, mode, className = "" }: Persona
         )}
         {mode === "free-preview" && <div className="portrait-preview-mask" aria-hidden="true"><i /><i /><i /></div>}
       </div>
-      <figcaption className="portrait-status">
+      {showStatus && <figcaption className="portrait-status">
         <span>{mode === "free-preview" ? "初步形象预览" : "正式人格"}</span>
         <p>{mode === "free-preview" ? "完整20题后确认正式人格与完整形象" : "完整人格形象 · 正式揭晓"}</p>
-      </figcaption>
+      </figcaption>}
     </figure>
   );
 }

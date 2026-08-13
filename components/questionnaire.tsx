@@ -11,6 +11,7 @@ export function Questionnaire({
   label,
   notice,
   devPreview = false,
+  optionCards = false,
   onSelect,
   onBack,
   children,
@@ -23,6 +24,7 @@ export function Questionnaire({
   label: string;
   notice?: string;
   devPreview?: boolean;
+  optionCards?: boolean;
   onSelect: (value: AnswerValue) => void;
   onBack: () => void;
   children?: React.ReactNode;
@@ -38,10 +40,10 @@ export function Questionnaire({
       <section className="question-stage" key={question.id}>
         <p className="question-number">第 {String(current + 1).padStart(2, "0")} 题</p>
         <h1 className="question-title">{question.prompt}</h1>
-        <div className="options">
+        <div className={`options${optionCards ? " options--cards" : ""}`}>
           {question.options.map((option, index) => (
-            <button key={option.value} className={`option-button ${answers[current] === option.value ? "selected" : ""}`} onClick={() => onSelect(option.value)} disabled={moving}>
-              <span>{index + 1}</span><span>{option.label}</span>
+            <button key={option.value} className={`option-button${optionCards ? " option-button--card" : ""} ${answers[current] === option.value ? "selected" : ""}`} onClick={() => onSelect(option.value)} disabled={moving} aria-pressed={answers[current] === option.value}>
+              <span>{optionCards ? String(index + 1).padStart(2, "0") : index + 1}</span><span>{option.label}</span>
             </button>
           ))}
         </div>

@@ -1,6 +1,10 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
-import { createFreeShareCardModel } from "./free-share-card";
+import {
+  createFreeShareCardModel,
+  FREE_SHARE_CARD_SIZE,
+  FREE_SHARE_PORTRAIT_FRAME,
+} from "./free-share-card";
 import { createFreeShareText, shareFreeResult } from "./free-share";
 import { getPublicEntryUrl, getVisibleBrandAccount } from "./public-entry";
 import type { FreePersonalityPreview } from "./types";
@@ -38,6 +42,11 @@ describe("public free sharing", () => {
     expect(serialized).not.toContain("/api/premium/personality-portrait/");
     expect(serialized).not.toContain("scores");
     expect(serialized).not.toContain("share.quote");
+  });
+
+  it("uses the same phone canvas and 3:4 portrait frame as the locked Premium master", () => {
+    expect(FREE_SHARE_CARD_SIZE).toEqual({ width: 1080, height: 1920 });
+    expect(FREE_SHARE_PORTRAIT_FRAME.width / FREE_SHARE_PORTRAIT_FRAME.height).toBe(3 / 4);
   });
 
   it("shares a PNG file when the browser supports file sharing", async () => {
@@ -79,5 +88,17 @@ describe("public free sharing", () => {
     expect(source).not.toContain("/api/premium");
     expect(source).not.toContain("StoredResult");
     expect(source).not.toContain("share.quote");
+  });
+
+  it("renders a restrained locked preview without QR, URL, or heavy acquisition copy", () => {
+    const source = readFileSync(new URL("./free-share-card.ts", import.meta.url), "utf8");
+    expect(source).toContain("当前为8题初步人格 · 完成20题后将重新校准正式人格");
+    expect(source).toContain("解锁正式人格、完整形象与完整关系档案");
+    expect(source).toContain("小红书 · TypeLab 类型志");
+    expect(source).not.toContain("createQrImage");
+    expect(source).not.toContain("测测你的恋爱人格");
+    expect(source).not.toContain("ctx.fillText(model.publicUrl");
+    expect(source).not.toContain('ctx.fillStyle = "rgba(243,240,233,.12)"');
+    expect(source).not.toContain('portrait.y + portrait.height - 250');
   });
 });

@@ -72,12 +72,11 @@ export function HomeExperience({ devPreview = false }: { devPreview?: boolean })
 
   return (
     <>{devPreview && <DevPreviewBanner />}<main className="app-shell landing page-padding">
-      <nav className="landing-nav"><p className="eyebrow">16型恋爱人格测试</p><span className="landing-index">完整版</span></nav>
+      <nav className="landing-nav"><p className="eyebrow">16型恋爱人格测试</p></nav>
       <section className="hero premium-entry-hero">
         <p className="eyebrow">恋爱动物人格 · 完整版</p>
         <h1>确认你的<br />正式恋爱人格</h1>
         <p className="hero-line">完成20个关系场景，<br />展开你的完整恋爱人格档案。</p>
-        <div className="hero-facts"><span>正式人格</span><span>关系坐标</span><span>完整人格形象</span></div>
         <ul className="premium-content-list">
           {["恋爱底色", "心动机制", "安全感机制", "恋爱雷区", "隐藏需求", "人格恋爱系统", "关系建议", "完整人格形象"].map((item) => <li key={item}>○ {item}</li>)}
         </ul>
@@ -92,7 +91,10 @@ export function HomeExperience({ devPreview = false }: { devPreview?: boolean })
         )}
         <p className="error-text" role="alert">{error}</p>
       </section>
-      <p className="disclaimer">访问码由小红书订单自动发货提供。本网站不展示价格、不创建订单，也不处理付款。</p>
+      <footer className="premium-entry-footer">
+        <p className="disclaimer">访问码由小红书订单自动发货提供。本网站不展示价格、不创建订单，也不处理付款。</p>
+        <p className="premium-entry-brand">TypeLab 类型志</p>
+      </footer>
     </main></>
   );
 }

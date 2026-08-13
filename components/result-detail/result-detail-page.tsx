@@ -45,18 +45,16 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
   return (
     <main className="app-shell result-page result-page-v2" style={style}>
       <section className="result-hero v2-hero page-padding">
-        <header className="result-top"><p className="eyebrow">00 / 人格封面</p><span className="type-number">{personality.id}号人格</span></header>
-        <PersonalityVisual personality={personality} mode="premium" />
+        <header className="result-top"><p className="eyebrow">人格封面</p><span className="type-number">{personality.id}号人格</span></header>
+        <PersonalityVisual personality={personality} mode="premium" showStatus={false} />
         <div className="result-identity">
-          <p className="eyebrow">正式人格 · 完整揭晓</p>
           <h1>{personality.name}</h1>
           <p className="result-tagline">{personality.tagline}</p>
           <p className="v2-short-description">{v2.shortDescription}</p>
-          <div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>○ {trait}</span>)}</div>
+          <div className="trait-row">{personality.keywords.map((trait) => <span key={trait}>{trait}</span>)}</div>
         </div>
         <div className="premium-hero-save">
           <button className="secondary-button" type="button" onClick={onSave}>保存我的人格卡</button>
-          <p>完整人格卡 · 高清保存</p>
           {actionMessage && <span role="status">{actionMessage}</span>}
         </div>
       </section>
@@ -71,7 +69,7 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
         ))}</div>
       </ResultSection>
 
-      <ResultSection number="03" title="你的恋爱底色">
+      <ResultSection number="03" title="你的恋爱底色" className="v2-closing-quote">
         <div className="v2-editorial-copy"><p className="v2-insight">{v2.base.insight}</p><h3>{v2.base.headline}</h3><p>{v2.base.description}</p></div>
         <KeywordList keywords={v2.base.keywords} />
         <PersonalityQuote>{v2.base.quote}</PersonalityQuote>
@@ -82,7 +80,7 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
         <HeartFlow stages={v2.heart.stages} />
       </ResultSection>
 
-      <ResultSection number="05" title="你最需要的安全感">
+      <ResultSection number="05" title="你最需要的安全感" className="v2-closing-quote">
         <div className="v2-editorial-copy"><p className="v2-insight">{v2.safety.insight}</p><h3>{v2.safety.headline}</h3><p>{v2.safety.description}</p></div>
         <SafetyFormula items={v2.safety.formula} />
         <PersonalityQuote>{v2.safety.quote}</PersonalityQuote>

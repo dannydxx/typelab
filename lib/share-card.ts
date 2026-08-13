@@ -20,9 +20,9 @@ export async function loadImage(url: string) {
   });
 }
 
-export function createShareCanvas() {
+export function createShareCanvas(width = 1080, height = 1440) {
   const canvas = document.createElement("canvas");
-  canvas.width = 1080; canvas.height = 1440;
+  canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("CANVAS_UNAVAILABLE");
   return { canvas, ctx };

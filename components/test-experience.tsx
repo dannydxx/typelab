@@ -119,7 +119,7 @@ export function TestExperience() {
 
   if (!ready) return <main className="app-shell analysis-page"><p className="eyebrow">正在准备题目……</p></main>;
   return (
-    <Questionnaire questions={QUESTIONS} current={progress.current} answers={progress.answers} moving={moving} error={error} label="完整版 · 恋爱模式" notice={transferNotice} onSelect={selectAnswer} onBack={() => progress.current > 0 && persist({ ...progress, current: progress.current - 1 })}>
+    <Questionnaire questions={QUESTIONS} current={progress.current} answers={progress.answers} moving={moving} error={error} label="完整版 · 恋爱模式" notice={transferNotice} optionCards onSelect={selectAnswer} onBack={() => progress.current > 0 && persist({ ...progress, current: progress.current - 1 })}>
       {resumePrompt && (
         <div className="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="resume-title">
           <div className="modal">

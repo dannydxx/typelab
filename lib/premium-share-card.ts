@@ -1,6 +1,4 @@
-import { PRODUCT_CONFIG } from "./config";
 import { getPremiumPortraitUrl } from "./personality-visual-assets";
-import { getVisibleBrandAccount } from "./public-entry";
 import { scoreToPercent } from "./scoring";
 import {
   canvasToPngBlob,
@@ -9,6 +7,7 @@ import {
   drawPortraitFallback,
   loadImage,
   roundedRect,
+  wrapCanvasText,
 } from "./share-card";
 import type { Personality, StoredResult } from "./types";
 
@@ -17,6 +16,9 @@ const PREMIUM_TAGLINE_LETTER_SPACING = 1;
 const PREMIUM_TAGLINE_FONT_SIZES = [34, 32, 30, 28, 26, 24] as const;
 const OPENING_PUNCTUATION = new Set(Array.from("“‘（《〈【〔［｛"));
 const CLOSING_PUNCTUATION = new Set(Array.from("，。！？；：、）》〉】〕］｝”’…"));
+
+export const PREMIUM_SHARE_CARD_SIZE = { width: 1080, height: 1920 } as const;
+export const PREMIUM_SHARE_PORTRAIT_FRAME = { x: 72, y: 72, width: 936, height: 1248 } as const;
 
 export type PremiumTaglineLayout = {
   fontSize: number;
@@ -36,14 +38,14 @@ export function createPremiumTaglineLayout(
 
   for (const fontSize of PREMIUM_TAGLINE_FONT_SIZES.slice(0, 2)) {
     if (measuredWidth(text, fontSize) <= PREMIUM_TAGLINE_MAX_WIDTH) {
-      return { fontSize, lines: [text], lineHeight: 0, firstBaseline: 1052, traitTop: 1090 };
+      return { fontSize, lines: [text], lineHeight: 0, firstBaseline: 1478, traitTop: 1520 };
     }
   }
 
   for (const fontSize of PREMIUM_TAGLINE_FONT_SIZES.slice(1)) {
     const lines = wrapPremiumTagline(text, (value) => measuredWidth(value, fontSize));
     if (lines && lines.length <= 2) {
-      return { fontSize, lines, lineHeight: 38, firstBaseline: 1044, traitTop: 1112 };
+      return { fontSize, lines, lineHeight: 40, firstBaseline: 1470, traitTop: 1558 };
     }
   }
 
@@ -85,19 +87,21 @@ function wrapPremiumTagline(text: string, measureText: (value: string) => number
 }
 
 export async function createPremiumShareCard(personality: Personality, result: StoredResult) {
-  const { canvas, ctx } = createShareCanvas();
-  ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, 1080, 1440);
+  const { canvas, ctx } = createShareCanvas(PREMIUM_SHARE_CARD_SIZE.width, PREMIUM_SHARE_CARD_SIZE.height);
+  ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, PREMIUM_SHARE_CARD_SIZE.width, PREMIUM_SHARE_CARD_SIZE.height);
 
   const pathname = typeof window === "undefined" ? "" : window.location.pathname;
   const fullPortrait = getPremiumPortraitUrl(personality.id, pathname) ?? personality.image;
   const image = await loadImage(fullPortrait);
-  if (image) drawCoverImage(ctx, image, 70, 72, 940, 760);
-  else drawPortraitFallback(ctx, personality.id, personality.secondaryColor, personality.primaryColor, personality.darkColor, 70, 72, 940, 760);
+  const portrait = PREMIUM_SHARE_PORTRAIT_FRAME;
+  if (image) drawCoverImage(ctx, image, portrait.x, portrait.y, portrait.width, portrait.height);
+  else drawPortraitFallback(ctx, personality.id, personality.secondaryColor, personality.primaryColor, personality.darkColor, portrait.x, portrait.y, portrait.width, portrait.height);
 
-  ctx.fillStyle = "rgba(23,23,22,.76)"; ctx.fillRect(70, 72, 940, 60);
-  ctx.fillStyle = "#f8f5ee"; ctx.textAlign = "left"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "4px"; ctx.fillText(`16型恋爱人格测试 · ${personality.id}号人格`, 102, 111);
-  ctx.fillStyle = "#77736c"; ctx.font = '20px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("我的正式恋爱人格", 72, 898);
-  ctx.fillStyle = "#242321"; ctx.font = '76px "Songti SC", serif'; ctx.letterSpacing = "5px"; ctx.fillText(personality.name, 68, 995);
+  ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "2px";
+  ctx.textAlign = "left"; ctx.fillText(`我的正式恋爱人格 · ${personality.id}号人格`, 72, 48);
+  ctx.textAlign = "right"; ctx.fillText("TypeLab 16型恋爱人格测试", 1008, 48);
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#242321"; ctx.font = '72px "Songti SC", serif'; ctx.letterSpacing = "5px"; ctx.fillText(personality.name, 70, 1410);
   const taglineLayout = createPremiumTaglineLayout(personality.tagline, (value, fontSize) => {
     ctx.font = `${fontSize}px "Songti SC", serif`;
     return ctx.measureText(value).width;
@@ -117,15 +121,16 @@ export async function createPremiumShareCard(personality: Personality, result: S
     ["安全感", result.scores.security], ["亲密节奏", result.scores.closeness], ["表达方式", result.scores.expression], ["冲突处理", result.scores.conflict],
   ] as const;
   dimensions.forEach(([name, score], index) => {
-    const x = 70 + (index % 2) * 500; const y = 1208 + Math.floor(index / 2) * 66;
+    const x = 70 + (index % 2) * 500; const y = 1650 + Math.floor(index / 2) * 64;
     ctx.fillStyle = "#77736c"; ctx.font = '18px -apple-system, "PingFang SC", sans-serif'; ctx.fillText(name, x, y);
     ctx.strokeStyle = "rgba(36,35,33,.25)"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 100, y - 6); ctx.lineTo(x + 420, y - 6); ctx.stroke();
     ctx.fillStyle = personality.primaryColor; ctx.beginPath(); ctx.arc(x + 100 + scoreToPercent(score) * 3.2, y - 6, 8, 0, Math.PI * 2); ctx.fill();
   });
 
-  ctx.fillStyle = "#242321"; ctx.font = '22px "Songti SC", serif'; ctx.fillText(personality.v2?.share.quote ?? "有些人越喜欢越主动，有些人越喜欢反而越安静。", 70, 1372);
-  const brandAccount = getVisibleBrandAccount(PRODUCT_CONFIG.xhsAccount);
-  ctx.textAlign = "right"; ctx.fillStyle = "#77736c"; ctx.font = '17px -apple-system, "PingFang SC", sans-serif';
-  ctx.fillText([PRODUCT_CONFIG.brandName, brandAccount].filter(Boolean).join(" · "), 1010, 1372);
+  ctx.textAlign = "left"; ctx.fillStyle = "#97928a"; ctx.font = '14px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("关系主张", 70, 1778);
+  ctx.fillStyle = "#5f5b55"; ctx.font = '20px "Songti SC", serif'; ctx.letterSpacing = ".5px";
+  wrapCanvasText(ctx, personality.v2?.share.quote ?? "有些人越喜欢越主动，有些人越喜欢反而越安静。", 70, 1814, 650, 28, 2);
+  ctx.textAlign = "right"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
+  ctx.fillText("小红书 · TypeLab 类型志", 1010, 1888);
   return canvasToPngBlob(canvas);
 }

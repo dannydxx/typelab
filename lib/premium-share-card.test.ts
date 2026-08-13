@@ -1,10 +1,28 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { PERSONALITIES } from "./personalities";
-import { createPremiumTaglineLayout } from "./premium-share-card";
+import {
+  createPremiumTaglineLayout,
+  PREMIUM_SHARE_CARD_SIZE,
+  PREMIUM_SHARE_PORTRAIT_FRAME,
+} from "./premium-share-card";
 
 const approximateSongtiWidth = (value: string, fontSize: number) => Array.from(value).length * fontSize;
 
 describe("Premium share-card tagline layout", () => {
+  it("uses a phone-oriented canvas with an exact 3:4 portrait frame", () => {
+    expect(PREMIUM_SHARE_CARD_SIZE).toEqual({ width: 1080, height: 1920 });
+    expect(PREMIUM_SHARE_PORTRAIT_FRAME.width / PREMIUM_SHARE_PORTRAIT_FRAME.height).toBe(3 / 4);
+  });
+
+  it("keeps identity and product labels outside the portrait without restoring the black overlay", () => {
+    const source = readFileSync(new URL("./premium-share-card.ts", import.meta.url), "utf8");
+    expect(source).toContain("我的正式恋爱人格 · ${personality.id}号人格");
+    expect(source).toContain("TypeLab 16型恋爱人格测试");
+    expect(source).toContain("小红书 · TypeLab 类型志");
+    expect(source).not.toContain('rgba(23,23,22,.76)');
+  });
+
   it("keeps all sixteen frozen taglines within the safe width and at no more than two lines", () => {
     for (const personality of PERSONALITIES) {
       const layout = createPremiumTaglineLayout(personality.tagline, approximateSongtiWidth);
@@ -18,7 +36,7 @@ describe("Premium share-card tagline layout", () => {
     const personality = PERSONALITIES.find(({ id }) => id === "02");
     expect(personality).toBeDefined();
     const layout = createPremiumTaglineLayout(personality!.tagline, approximateSongtiWidth);
-    expect(layout).toMatchObject({ fontSize: 32, lines: [personality!.tagline], firstBaseline: 1052, traitTop: 1090 });
+    expect(layout).toMatchObject({ fontSize: 32, lines: [personality!.tagline], firstBaseline: 1478, traitTop: 1520 });
   });
 
   it("wraps longer future text without leading closing punctuation or trailing opening punctuation", () => {
@@ -28,7 +46,7 @@ describe("Premium share-card tagline layout", () => {
     expect(layout.lines.length).toBe(2);
     expect(layout.lines[0]).not.toMatch(/[“‘（《〈【〔［｛]$/);
     expect(layout.lines[1]).not.toMatch(/^[，。！？；：、）》〉】〕］｝”’…]/);
-    expect(layout.traitTop).toBe(1112);
+    expect(layout.traitTop).toBe(1558);
   });
 
   it("keeps English words intact in mixed-language taglines", () => {
