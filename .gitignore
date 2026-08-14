@@ -15,6 +15,16 @@
 .env
 .env.local
 .env.*.local
+.env*
+!.env.example
+
+# local generated and private material
+/.generated/
+*.pem
+*.key
+*.p12
+*.pfx
+/supabase/.temp/
 
 # local tooling
 *.log
