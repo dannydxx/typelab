@@ -78,7 +78,10 @@ export async function createFreeShareCard(preview: FreePersonalityPreview) {
   ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, FREE_SHARE_CARD_SIZE.width, FREE_SHARE_CARD_SIZE.height);
 
   const portrait = FREE_SHARE_PORTRAIT_FRAME;
-  await drawFreePreviewPortrait(ctx, model.portraitUrl, portrait);
+  const [brandWordmark] = await Promise.all([
+    loadImage("/brand/typelab-wordmark.png"),
+    drawFreePreviewPortrait(ctx, model.portraitUrl, portrait),
+  ]);
 
   ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "2px";
   ctx.textAlign = "left"; ctx.fillText(`TYPE ${model.id} · 8题初步人格`, 72, 48);
@@ -105,7 +108,15 @@ export async function createFreeShareCard(preview: FreePersonalityPreview) {
   ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
   ctx.fillText("当前为8题初步人格 · 完成20题后将重新校准正式人格", 96, 1802);
   ctx.fillText("解锁正式人格、完整形象与完整关系档案", 96, 1840);
-  ctx.textAlign = "right"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
-  ctx.fillText("小红书 · TypeLab 类型志", 1010, 1888);
+  const brandCenterY = 1882;
+  const brandLogoHeight = 22;
+  const brandLogoAspectRatio = brandWordmark && brandWordmark.naturalWidth > 0 && brandWordmark.naturalHeight > 0
+    ? brandWordmark.naturalWidth / brandWordmark.naturalHeight
+    : 0;
+  const brandLogoWidth = brandLogoHeight * brandLogoAspectRatio;
+  ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
+  ctx.fillText("小红书", brandWordmark ? 1010 - brandLogoWidth - 12 : 1010, brandCenterY);
+  if (brandWordmark) ctx.drawImage(brandWordmark, 1010 - brandLogoWidth, brandCenterY - brandLogoHeight / 2, brandLogoWidth, brandLogoHeight);
+  ctx.textBaseline = "alphabetic";
   return canvasToPngBlob(canvas);
 }

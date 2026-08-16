@@ -19,7 +19,10 @@ describe("Premium share-card tagline layout", () => {
     const source = readFileSync(new URL("./premium-share-card.ts", import.meta.url), "utf8");
     expect(source).toContain("我的正式恋爱人格 · ${personality.id}号人格");
     expect(source).toContain("TypeLab 16型恋爱人格测试");
-    expect(source).toContain("小红书 · TypeLab 类型志");
+    expect(source).toContain('loadImage("/brand/typelab-wordmark.png")');
+    expect(source).toContain("brandWordmark.naturalWidth / brandWordmark.naturalHeight");
+    expect(source).toContain('ctx.fillText("小红书"');
+    expect(source).not.toContain("小红书 · TypeLab 类型志");
     expect(source).not.toContain('rgba(23,23,22,.76)');
   });
 

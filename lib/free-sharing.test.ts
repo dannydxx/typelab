@@ -57,6 +57,15 @@ describe("public free sharing", () => {
     expect(FREE_SHARE_PORTRAIT_FRAME.width / FREE_SHARE_PORTRAIT_FRAME.height).toBe(3 / 4);
   });
 
+  it.each(["01", "08", "16"])("keeps TYPE%s on its Free preview portrait mapping", (id) => {
+    const model = createFreeShareCardModel({
+      ...preview,
+      id,
+      previewPortrait: `/personality-preview/type${id}.webp`,
+    });
+    expect(model.portraitUrl).toBe(`/personality-preview/type${id}.webp`);
+  });
+
   it("shares a PNG file when the browser supports file sharing", async () => {
     const share = vi.fn().mockResolvedValue(undefined);
     const outcome = await shareFreeResult(new Blob(["png"], { type: "image/png" }), preview, "https://example.com/", {
@@ -108,7 +117,10 @@ describe("public free sharing", () => {
     const source = readFileSync(new URL("./free-share-card.ts", import.meta.url), "utf8");
     expect(source).toContain("当前为8题初步人格 · 完成20题后将重新校准正式人格");
     expect(source).toContain("解锁正式人格、完整形象与完整关系档案");
-    expect(source).toContain("小红书 · TypeLab 类型志");
+    expect(source).toContain('loadImage("/brand/typelab-wordmark.png")');
+    expect(source).toContain("brandWordmark.naturalWidth / brandWordmark.naturalHeight");
+    expect(source).toContain('ctx.fillText("小红书"');
+    expect(source).not.toContain("小红书 · TypeLab 类型志");
     expect(source).not.toContain("createQrImage");
     expect(source).not.toContain("publicUrl");
     expect(source).not.toContain("localhost");

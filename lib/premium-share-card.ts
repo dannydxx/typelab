@@ -92,7 +92,10 @@ export async function createPremiumShareCard(personality: Personality, result: S
 
   const pathname = typeof window === "undefined" ? "" : window.location.pathname;
   const fullPortrait = getPremiumPortraitUrl(personality.id, pathname) ?? personality.image;
-  const image = await loadImage(fullPortrait);
+  const [image, brandWordmark] = await Promise.all([
+    loadImage(fullPortrait),
+    loadImage("/brand/typelab-wordmark.png"),
+  ]);
   const portrait = PREMIUM_SHARE_PORTRAIT_FRAME;
   if (image) drawCoverImage(ctx, image, portrait.x, portrait.y, portrait.width, portrait.height);
   else drawPortraitFallback(ctx, personality.id, personality.secondaryColor, personality.primaryColor, personality.darkColor, portrait.x, portrait.y, portrait.width, portrait.height);
@@ -130,7 +133,15 @@ export async function createPremiumShareCard(personality: Personality, result: S
   ctx.textAlign = "left"; ctx.fillStyle = "#97928a"; ctx.font = '14px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "3px"; ctx.fillText("关系主张", 70, 1778);
   ctx.fillStyle = "#5f5b55"; ctx.font = '20px "Songti SC", serif'; ctx.letterSpacing = ".5px";
   wrapCanvasText(ctx, personality.v2?.share.quote ?? "有些人越喜欢越主动，有些人越喜欢反而越安静。", 70, 1814, 650, 28, 2);
-  ctx.textAlign = "right"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
-  ctx.fillText("小红书 · TypeLab 类型志", 1010, 1888);
+  const brandCenterY = 1882;
+  const brandLogoHeight = 22;
+  const brandLogoAspectRatio = brandWordmark && brandWordmark.naturalWidth > 0 && brandWordmark.naturalHeight > 0
+    ? brandWordmark.naturalWidth / brandWordmark.naturalHeight
+    : 0;
+  const brandLogoWidth = brandLogoHeight * brandLogoAspectRatio;
+  ctx.textAlign = "right"; ctx.textBaseline = "middle"; ctx.fillStyle = "#8b867e"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "1px";
+  ctx.fillText("小红书", brandWordmark ? 1010 - brandLogoWidth - 12 : 1010, brandCenterY);
+  if (brandWordmark) ctx.drawImage(brandWordmark, 1010 - brandLogoWidth, brandCenterY - brandLogoHeight / 2, brandLogoWidth, brandLogoHeight);
+  ctx.textBaseline = "alphabetic";
   return canvasToPngBlob(canvas);
 }
