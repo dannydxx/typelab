@@ -1,10 +1,8 @@
-import { PRODUCT_CONFIG } from "./config";
-import { getPublicEntryUrl } from "./public-entry";
+import { getPersonalityVisualAsset } from "./personality-visual-assets";
 import {
   canvasToPngBlob,
   createShareCanvas,
   drawCoverImage,
-  drawPortraitFallback,
   loadImage,
   roundedRect,
   wrapCanvasText,
@@ -21,30 +19,66 @@ export interface FreeShareCardModel {
   tagline: string;
   keywords: readonly string[];
   summaryHeadline: string;
-  publicUrl: string;
 }
 
-export function createFreeShareCardModel(preview: FreePersonalityPreview, configuredUrl = PRODUCT_CONFIG.siteUrl): FreeShareCardModel {
+export function createFreeShareCardModel(preview: FreePersonalityPreview): FreeShareCardModel {
+  const visualAsset = getPersonalityVisualAsset(preview.id);
+  if (!visualAsset || visualAsset.previewPortrait !== preview.previewPortrait) {
+    throw new Error(`FREE_PREVIEW_PORTRAIT_MISMATCH:${preview.id}`);
+  }
+
   return {
     id: preview.id,
     name: preview.name,
-    portraitUrl: preview.previewPortrait,
+    portraitUrl: visualAsset.previewPortrait,
     tagline: preview.tagline,
     keywords: preview.keywords,
     summaryHeadline: preview.summaryHeadline,
-    publicUrl: getPublicEntryUrl(configuredUrl),
   };
 }
 
-export async function createFreeShareCard(preview: FreePersonalityPreview, configuredUrl = PRODUCT_CONFIG.siteUrl) {
-  const model = createFreeShareCardModel(preview, configuredUrl);
+async function drawFreePreviewPortrait(
+  ctx: CanvasRenderingContext2D,
+  portraitUrl: string,
+  frame: typeof FREE_SHARE_PORTRAIT_FRAME,
+) {
+  const response = await fetch(portraitUrl, {
+    cache: "force-cache",
+    credentials: "same-origin",
+  });
+  if (!response.ok) throw new Error(`FREE_PREVIEW_PORTRAIT_FETCH_FAILED:${response.status}`);
+
+  const blob = await response.blob();
+  if (!blob.type.startsWith("image/")) throw new Error("FREE_PREVIEW_PORTRAIT_INVALID_CONTENT_TYPE");
+
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const image = await loadImage(objectUrl);
+    if (!image || image.naturalWidth <= 0 || image.naturalHeight <= 0) {
+      throw new Error("FREE_PREVIEW_PORTRAIT_DECODE_FAILED");
+    }
+    if (typeof image.decode === "function") {
+      try {
+        await image.decode();
+      } catch {
+        if (!image.complete || image.naturalWidth <= 0) {
+          throw new Error("FREE_PREVIEW_PORTRAIT_DECODE_FAILED");
+        }
+      }
+    }
+    drawCoverImage(ctx, image, frame.x, frame.y, frame.width, frame.height);
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+export async function createFreeShareCard(preview: FreePersonalityPreview) {
+  const model = createFreeShareCardModel(preview);
   const { canvas, ctx } = createShareCanvas(FREE_SHARE_CARD_SIZE.width, FREE_SHARE_CARD_SIZE.height);
   ctx.fillStyle = "#f3f0e9"; ctx.fillRect(0, 0, FREE_SHARE_CARD_SIZE.width, FREE_SHARE_CARD_SIZE.height);
 
-  const image = await loadImage(model.portraitUrl);
   const portrait = FREE_SHARE_PORTRAIT_FRAME;
-  if (image) drawCoverImage(ctx, image, portrait.x, portrait.y, portrait.width, portrait.height);
-  else drawPortraitFallback(ctx, model.id, preview.secondaryColor, preview.primaryColor, preview.darkColor, portrait.x, portrait.y, portrait.width, portrait.height);
+  await drawFreePreviewPortrait(ctx, model.portraitUrl, portrait);
 
   ctx.fillStyle = "#77736c"; ctx.font = '16px -apple-system, "PingFang SC", sans-serif'; ctx.letterSpacing = "2px";
   ctx.textAlign = "left"; ctx.fillText(`TYPE ${model.id} · 8题初步人格`, 72, 48);

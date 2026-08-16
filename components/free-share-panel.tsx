@@ -15,7 +15,7 @@ export function FreeSharePanel({ preview }: { preview: FreePersonalityPreview })
 
   useEffect(() => {
     let active = true;
-    void createFreeShareCard(preview, publicUrl).then((blob) => {
+    void createFreeShareCard(preview).then((blob) => {
       if (!active) return;
       setCard(blob);
       setMessage("");
@@ -23,7 +23,7 @@ export function FreeSharePanel({ preview }: { preview: FreePersonalityPreview })
       if (active) setMessage("人格卡暂时无法生成，你仍可复制分享文案。");
     });
     return () => { active = false; };
-  }, [preview, publicUrl]);
+  }, [preview]);
 
   useEffect(() => () => {
     if (generatedImageUrl) URL.revokeObjectURL(generatedImageUrl);

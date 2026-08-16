@@ -1,5 +1,3 @@
-import QRCode from "qrcode";
-
 export function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
   ctx.beginPath(); ctx.roundRect(x, y, width, height, radius); ctx.fill();
 }
@@ -43,16 +41,6 @@ export function wrapCanvasText(ctx: CanvasRenderingContext2D, text: string, x: n
   if (lines.length < maxLines && line) lines.push(line);
   lines.forEach((value, index) => ctx.fillText(value, x, y + index * lineHeight));
   return y + lines.length * lineHeight;
-}
-
-export async function createQrImage(publicUrl: string, darkColor: string, lightColor = "#f3f0e9") {
-  const dataUrl = await QRCode.toDataURL(publicUrl, {
-    margin: 0,
-    width: 164,
-    errorCorrectionLevel: "M",
-    color: { dark: darkColor, light: lightColor },
-  });
-  return loadImage(dataUrl);
 }
 
 export function canvasToPngBlob(canvas: HTMLCanvasElement) {

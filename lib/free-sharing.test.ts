@@ -35,13 +35,21 @@ describe("public free sharing", () => {
   });
 
   it("builds the free card from preview-only fields", () => {
-    const model = createFreeShareCardModel(preview, "https://example.com/free/result?attempt=private");
+    const model = createFreeShareCardModel(preview);
     const serialized = JSON.stringify(model);
     expect(model.portraitUrl).toBe("/personality-preview/type09.webp");
-    expect(model.publicUrl).toBe("https://example.com/");
+    expect(model).not.toHaveProperty("publicUrl");
     expect(serialized).not.toContain("/api/premium/personality-portrait/");
+    expect(serialized).not.toMatch(/https?:\/\//);
     expect(serialized).not.toContain("scores");
     expect(serialized).not.toContain("share.quote");
+  });
+
+  it("rejects a preview portrait path that does not match the shared TYPE mapping", () => {
+    expect(() => createFreeShareCardModel({
+      ...preview,
+      previewPortrait: "/api/premium/personality-portrait/09",
+    })).toThrow("FREE_PREVIEW_PORTRAIT_MISMATCH:09");
   });
 
   it("uses the same phone canvas and 3:4 portrait frame as the locked Premium master", () => {
@@ -83,11 +91,17 @@ describe("public free sharing", () => {
 
   it("keeps the free share source outside Premium data and portrait APIs", () => {
     const source = readFileSync(new URL("./free-share-card.ts", import.meta.url), "utf8");
-    expect(source).toContain("preview.previewPortrait");
+    expect(source).toContain("getPersonalityVisualAsset(preview.id)");
+    expect(source).toContain("visualAsset.previewPortrait !== preview.previewPortrait");
+    expect(source).toContain('fetch(portraitUrl');
+    expect(source).toContain('response.blob()');
+    expect(source).toContain('await image.decode()');
+    expect(source).toContain("drawCoverImage(ctx, image");
     expect(source).not.toContain("premiumPortrait");
     expect(source).not.toContain("/api/premium");
     expect(source).not.toContain("StoredResult");
     expect(source).not.toContain("share.quote");
+    expect(source).not.toContain("drawPortraitFallback");
   });
 
   it("renders a restrained locked preview without QR, URL, or heavy acquisition copy", () => {
@@ -96,9 +110,22 @@ describe("public free sharing", () => {
     expect(source).toContain("解锁正式人格、完整形象与完整关系档案");
     expect(source).toContain("小红书 · TypeLab 类型志");
     expect(source).not.toContain("createQrImage");
+    expect(source).not.toContain("publicUrl");
+    expect(source).not.toContain("localhost");
+    expect(source).not.toContain("未央关系研究所");
+    expect(source).not.toMatch(/https?:\/\//);
     expect(source).not.toContain("测测你的恋爱人格");
     expect(source).not.toContain("ctx.fillText(model.publicUrl");
     expect(source).not.toContain('ctx.fillStyle = "rgba(243,240,233,.12)"');
     expect(source).not.toContain('portrait.y + portrait.height - 250');
+  });
+
+  it("removes the legacy QR renderer and dependency from the shared canvas layer", () => {
+    const sharedSource = readFileSync(new URL("./share-card.ts", import.meta.url), "utf8");
+    const packageSource = readFileSync(new URL("../package.json", import.meta.url), "utf8");
+    expect(sharedSource).not.toContain("QRCode");
+    expect(sharedSource).not.toContain("createQrImage");
+    expect(packageSource).not.toContain('"qrcode"');
+    expect(packageSource).not.toContain('"@types/qrcode"');
   });
 });

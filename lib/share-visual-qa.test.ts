@@ -9,6 +9,13 @@ describe("development share visual QA", () => {
     expect(source).not.toMatch(/createElement\(["']canvas["']\)|drawCoverImage|fillText|drawImage/);
   });
 
+  it("keeps the real Free result save flow on the same production renderer", () => {
+    const panelSource = readFileSync(new URL("../components/free-share-panel.tsx", import.meta.url), "utf8");
+    expect(panelSource).toContain('import { createFreeShareCard } from "@/lib/free-share-card"');
+    expect(panelSource).toContain("createFreeShareCard(preview)");
+    expect(panelSource).not.toMatch(/createElement\(["']canvas["']\)|drawImage|createQrImage/);
+  });
+
   it("keeps the route development-only", () => {
     const source = readFileSync(new URL("../app/dev/share-preview/page.tsx", import.meta.url), "utf8");
     expect(source).toContain('process.env.NODE_ENV !== "development"');
