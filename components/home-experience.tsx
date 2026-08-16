@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { STORAGE_KEYS } from "@/lib/config";
 import type { PremiumAccessState } from "@/lib/types";
 import { startPremiumAttempt } from "@/lib/start-premium-attempt";
@@ -93,7 +94,7 @@ export function HomeExperience({ devPreview = false }: { devPreview?: boolean })
       </section>
       <footer className="premium-entry-footer">
         <p className="disclaimer">完整版正在准备中，尚未正式开放售卖。持有体验码可进入完整版测试。</p>
-        <p className="premium-entry-brand">TypeLab 类型志</p>
+        <Image className="premium-entry-brand" src="/brand/typelab-wordmark.png" alt="TypeLab 类型志" width={88} height={21} />
       </footer>
     </main></>
   );

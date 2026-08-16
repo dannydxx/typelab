@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { FREE_STORAGE_KEYS } from "@/lib/config";
 
 export function FreeHomeExperience() {
@@ -18,7 +19,10 @@ export function FreeHomeExperience() {
 
   return (
     <main className="app-shell free-landing page-padding">
-      <nav className="landing-nav"><p className="eyebrow">恋爱人格快速体验</p><span className="landing-index">免费版 · 08题</span></nav>
+      <div className="free-brand">
+        <span className="free-brand-xhs">小红书</span>
+        <Image className="free-brand-wordmark" src="/brand/typelab-wordmark.png" alt="TypeLab 类型志" width={112} height={26} />
+      </div>
       <section className="free-hero">
         <div className="free-archive-mark" aria-hidden="true"><span>免费体验</span><strong>08</strong></div>
         <p className="eyebrow">一分钟人格速写</p>
