@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { PersonalityV2 } from "@/lib/types";
 import { PersonalityQuote } from "./personality-quote";
 
@@ -18,9 +19,9 @@ export function ResultSharePanel({ share, actionMessage, retestBusy, onSave, onC
       <button className="secondary-button" onClick={onRetest} disabled={retestBusy}>{retestBusy ? "正在准备新测试……" : "再测一次"}</button>
       <button className="text-button result-home-link" onClick={onHome}>返回完整版首页</button>
       <p className="error-text" role="status">{actionMessage}</p>
-      <div className="result-brand" aria-label="TypeLab 类型志">
-        <span className="result-brand-logo" aria-hidden="true">TL</span>
-        <strong>TypeLab 类型志</strong>
+      <div className="result-brand">
+        <span>小红书</span>
+        <Image className="result-brand-wordmark" src="/brand/typelab-wordmark.png" alt="TypeLab 类型志" width={44} height={20} />
       </div>
       <p className="result-note">测试用于娱乐、自我探索及关系沟通参考，不构成心理诊断。</p>
     </div>
