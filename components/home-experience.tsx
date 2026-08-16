@@ -92,7 +92,7 @@ export function HomeExperience({ devPreview = false }: { devPreview?: boolean })
         <p className="error-text" role="alert">{error}</p>
       </section>
       <footer className="premium-entry-footer">
-        <p className="disclaimer">访问码由小红书订单自动发货提供。本网站不展示价格、不创建订单，也不处理付款。</p>
+        <p className="disclaimer">完整版正在准备中，尚未正式开放售卖。持有体验码可进入完整版测试。</p>
         <p className="premium-entry-brand">TypeLab 类型志</p>
       </footer>
     </main></>

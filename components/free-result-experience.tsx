@@ -111,10 +111,10 @@ export function FreeResultExperience() {
         <h2>{premiumCopy.title}</h2>
         <p>{premiumCopy.description}</p>
         <div className="access-delivery-note">
-          <span>完整版访问方式</span>
-          <p>完整版访问码由小红书订单自动发货提供，收到后可直接进入完整版测试。</p>
+          <span>完整版开放状态</span>
+          <p>完整版正在准备中，将在小红书店铺正式开放。</p>
         </div>
-        <Link className="secondary-button access-entry-link" href="/premium">已有访问码，进入完整版</Link>
+        <Link className="secondary-button access-entry-link" href="/premium">已有体验码，进入完整版</Link>
         <Link className="text-button free-retry" href="/free">重新体验免费版</Link>
       </section>
     </main>

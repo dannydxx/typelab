@@ -33,7 +33,7 @@ export function AccessCodePanel({ onSuccess }: { onSuccess: () => void | Promise
 
   return (
     <form className="access-code-panel" onSubmit={activate}>
-      <label htmlFor="premium-access-code">请输入小红书订单自动发货中的测评码</label>
+      <label htmlFor="premium-access-code">请输入完整版体验码</label>
       <input
         id="premium-access-code"
         value={accessCode}

@@ -82,12 +82,17 @@ describe("free result conversion experience", () => {
 
   it("removes internal commerce and preserves the Premium value preview", () => {
     const homeSource = readFileSync(new URL("../components/home-experience.tsx", import.meta.url), "utf8");
+    const accessCodeSource = readFileSync(new URL("../components/access-code-panel.tsx", import.meta.url), "utf8");
     const freeResultSource = readFileSync(new URL("../components/free-result-experience.tsx", import.meta.url), "utf8");
-    expect(homeSource + freeResultSource).not.toMatch(/RedeemCodePanel|purchaseUrl|\/api\/redeem|¥|￥|支付按钮/);
+    expect(homeSource + accessCodeSource + freeResultSource).not.toMatch(/RedeemCodePanel|purchaseUrl|\/api\/redeem|¥|￥|支付按钮/);
     expect(existsSync(new URL("../components/redeem-code-panel.tsx", import.meta.url))).toBe(false);
     expect(existsSync(new URL("../components/purchase-guide.tsx", import.meta.url))).toBe(false);
     expect(existsSync(new URL("../app/api/redeem/route.ts", import.meta.url))).toBe(false);
     expect(freeResultSource).toContain("<LockedReportPreview");
-    expect(freeResultSource).toContain("完整版访问码由小红书订单自动发货提供");
+    expect(freeResultSource).toContain("完整版正在准备中，将在小红书店铺正式开放");
+    expect(freeResultSource).toContain("已有体验码，进入完整版");
+    expect(homeSource).toContain("尚未正式开放售卖");
+    expect(accessCodeSource).toContain("请输入完整版体验码");
+    expect(homeSource + accessCodeSource + freeResultSource).not.toMatch(/订单自动发货|已有访问码/);
   });
 });
