@@ -35,7 +35,7 @@ export function Questionnaire({
       <header>
         <div className="test-head"><p className="eyebrow">{label}</p><span className="type-number">{String(current + 1).padStart(2, "0")} / {String(questions.length).padStart(2, "0")}</span></div>
         <div className="progress-track"><div className="progress-fill" style={{ width: `${((current + 1) / questions.length) * 100}%` }} /></div>
-        {notice && <p role="status" style={{ margin: "12px 0 0", color: "var(--muted)", fontSize: 12, lineHeight: 1.6 }}>{notice}</p>}
+        {notice && <p className="test-notice" role="status">{notice}</p>}
       </header>
       <section className="question-stage" key={question.id}>
         <p className="question-number">第 {String(current + 1).padStart(2, "0")} 题</p>

@@ -100,6 +100,7 @@ a { color: inherit; text-decoration: none; }
 .test-head { display: flex; justify-content: space-between; align-items: center; }
 .progress-track { height: 1px; margin-top: 18px; background: rgba(36,35,33,.12); }
 .progress-fill { height: 100%; background: var(--ink); transition: width 300ms ease; }
+.test-notice { margin: 12px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .question-stage { flex: 1; padding-top: clamp(54px, 11vh, 100px); }
 .question-number { margin-bottom: 22px; color: var(--muted); font: 12px var(--font-serif); letter-spacing: .12em; }
 .question-title { min-height: 100px; margin: 0 0 42px; font: 400 24px/1.65 var(--font-serif); letter-spacing: .025em; }
@@ -119,9 +120,9 @@ a { color: inherit; text-decoration: none; }
 }
 .options--cards { display: grid; gap: 22px; border-top: 0; }
 .options--cards .option-button--card {
-  grid-template-columns: 26px minmax(0, 1fr);
+  grid-template-columns: 28px minmax(0, 1fr);
   gap: 12px;
-  align-items: start;
+  align-items: center;
   min-height: 64px;
   padding: 17px 16px;
   border: 1px solid rgba(36, 35, 33, .13);
@@ -132,7 +133,8 @@ a { color: inherit; text-decoration: none; }
   line-height: 1.75;
   transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease;
 }
-.options--cards .option-button--card span:first-child { color: #aaa69e; font-size: 10px; line-height: 2.3; letter-spacing: .08em; transition: color 140ms ease; }
+.options--cards .option-button--card span:first-child { display: block; width: 28px; color: #77736c; font-size: 11px; line-height: 1; letter-spacing: .08em; transition: color 140ms ease; }
+.options--cards .option-button--card span:nth-child(2) { min-width: 0; }
 .options--cards .option-button--card.selected {
   padding: 17px 16px;
   border-color: rgba(36, 35, 33, .44);
@@ -194,6 +196,8 @@ a { color: inherit; text-decoration: none; }
 @media (max-width: 430px) {
   .dev-preview-banner-full { display: none; }
   .dev-preview-banner-compact { display: inline; }
+  .test-page--dev-preview .question-stage { padding-top: clamp(36px, 6vh, 54px); }
+  .question-title { min-height: 72px; margin-bottom: 32px; }
 }
 .dev-preview-directory { max-width: 760px; margin: 0 auto; padding-top: 54px; padding-bottom: 70px; border-top: 1px solid var(--line); }
 .dev-preview-directory > .dev-preview-banner { position: static; margin-bottom: 30px; }
