@@ -32,3 +32,6 @@
 .vercel
 *.tsbuildinfo
 .npm-cache
+
+# WorkBuddy local metadata (never commit)
+/.workbuddy/
