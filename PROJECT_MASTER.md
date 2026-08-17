@@ -246,7 +246,7 @@ Free卡公开初步人格和测试入口，不公开Premium隐藏需求、INNER 
 | Dev预览 | `app/dev/`、`lib/dev-premium-preview.ts`、`components/share-visual-qa.tsx` |
 | Access授权 | `lib/server/access-code.ts`、`lib/server/access-session.ts`、`lib/server/premium-access.ts` |
 | 正式结果保护 | `app/premium/result/page.tsx`、`app/api/premium/personality-portrait/[type]/route.ts` |
-| 数据库 | `supabase/schema.sql`、`supabase/migrations/` |
+| 数据库 | `supabase/migrations/`（ACTIVE）、`supabase/archive/`（历史 SQL，含 `schema.sql`/20260810/20260811） |
 
 ## 12. 开发与交接规则
 

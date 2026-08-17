@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const migration = readFileSync(new URL("../../supabase/migrations/20260811_external_access_codes.sql", import.meta.url), "utf8");
+const migration = readFileSync(new URL("../../supabase/archive/20260811_external_access_codes.sql", import.meta.url), "utf8");
 
 describe("external commerce Access Code migration", () => {
   it("stores hashes and never introduces a plaintext code column", () => {

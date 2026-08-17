@@ -95,14 +95,19 @@ npm run dev
 
 ## 数据库
 
-新环境先执行 `supabase/schema.sql`，再依次执行：
+新项目 / 新环境数据库初始化使用以下 **ACTIVE DATABASE MIGRATIONS**（按依赖顺序执行）：
 
 ```text
-supabase/migrations/20260810_xhs_native_entitlements.sql
-supabase/migrations/20260811_external_access_codes.sql
+supabase/migrations/20260817000001_typelab_clean_base.sql
+supabase/migrations/20260817000002_fix_access_session_unique.sql
+supabase/migrations/20260817000003_fix_activate_access_code_ambiguity.sql
 ```
 
-V3.6 迁移采用增量策略，不 DROP 历史表。它新增 `access_code_batches`、`access_codes`、`access_sessions`，并让现有 `test_attempts`、`test_results` 支持 `access_code_id`。V3.5 的 XHS entitlement 对象保留供审计，但已退出运行时授权链。
+- `supabase/archive/` 仅存放历史 SQL（`schema.sql`、`20260810_xhs_native_entitlements.sql`、`20260811_external_access_codes.sql`），**不得用于新项目初始化**。
+- 当前 TypeLab-SG 已通过 Supabase SQL Editor 手工初始化并真实 E2E 验证，**尚未接管 Supabase CLI migration history**。
+- 在执行任何 `supabase db push` 之前，必须先完成 migration-history adoption / `supabase migration repair --status applied`，否则会重复应用或误应用历史 SQL。
+
+V3.6 采用的增量策略（不 DROP 历史表，新增 `access_code_batches`/`access_codes`/`access_sessions`，现有 `test_attempts`/`test_results` 支持 `access_code_id`）已并入上述 clean base；V3.5 的 XHS entitlement 对象保留在 archive 供审计，但已退出运行时授权链。
 
 ## 质量检查
 

@@ -30,7 +30,7 @@
 
 ## 数据库存储
 
-V3.6 增量迁移：`supabase/migrations/20260811_external_access_codes.sql`。
+V3.6 增量迁移（历史，已归档）：`supabase/archive/20260811_external_access_codes.sql`。当前 ACTIVE schema 由 `supabase/migrations/20260817000001_typelab_clean_base.sql` 及其两个 fix migration 定义。
 
 新增：
 
