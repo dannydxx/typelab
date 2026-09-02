@@ -28,18 +28,16 @@ const legacyReportSections = [
 
 const scoreFor = (result: StoredResult, key: "security" | "closeness" | "expression" | "conflict") => result.scores[key];
 
-export function ResultDetailPage({ personality, result, actionMessage, retestBusy, onSave, onCopy, onRetest, onHome }: {
+export function ResultDetailPage({ personality, result, actionMessage, onSave, onCopy, onHome }: {
   personality: Personality;
   result: StoredResult;
   actionMessage: string;
-  retestBusy: boolean;
   onSave: () => void;
   onCopy: () => void;
-  onRetest: () => void;
   onHome: () => void;
 }) {
   const style = { "--personality": personality.primaryColor } as CSSProperties;
-  if (!personality.v2) return <LegacyResultDetail personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={onSave} onCopy={onCopy} onRetest={onRetest} onHome={onHome} />;
+  if (!personality.v2) return <LegacyResultDetail personality={personality} result={result} actionMessage={actionMessage} onSave={onSave} onCopy={onCopy} onHome={onHome} />;
 
   const v2 = personality.v2;
   return (
@@ -114,20 +112,18 @@ export function ResultDetailPage({ personality, result, actionMessage, retestBus
       </ResultSection>
 
       <ResultSection number="11" title="人格分享卡" className="v2-share-section">
-        <ResultSharePanel share={v2.share} actionMessage={actionMessage} retestBusy={retestBusy} onSave={onSave} onCopy={onCopy} onRetest={onRetest} onHome={onHome} />
+        <ResultSharePanel share={v2.share} actionMessage={actionMessage} onSave={onSave} onCopy={onCopy} onHome={onHome} />
       </ResultSection>
     </main>
   );
 }
 
-function LegacyResultDetail({ personality, result, actionMessage, retestBusy, onSave, onCopy, onRetest, onHome }: {
+function LegacyResultDetail({ personality, result, actionMessage, onSave, onCopy, onHome }: {
   personality: Personality;
   result: StoredResult;
   actionMessage: string;
-  retestBusy: boolean;
   onSave: () => void;
   onCopy: () => void;
-  onRetest: () => void;
   onHome: () => void;
 }) {
   const report = personality.report;
@@ -151,7 +147,7 @@ function LegacyResultDetail({ personality, result, actionMessage, retestBusy, on
         const content = report[key];
         return <article className="report-block" key={key}><span className="report-number">{number}</span><h2>{title}</h2>{Array.isArray(content) ? <ul>{content.map((item) => <li key={item}>{item}</li>)}</ul> : <p>{content}</p>}</article>;
       })}
-      <ResultSharePanel actionMessage={actionMessage} retestBusy={retestBusy} onSave={onSave} onCopy={onCopy} onRetest={onRetest} onHome={onHome} />
+      <ResultSharePanel actionMessage={actionMessage} onSave={onSave} onCopy={onCopy} onHome={onHome} />
     </section>
   </main>;
 }

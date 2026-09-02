@@ -7,8 +7,6 @@ import { createPremiumShareCard } from "@/lib/premium-share-card";
 import type { StoredResult } from "@/lib/types";
 import { ResultReveal } from "./result-reveal";
 import { ResultDetailPage } from "./result-detail/result-detail-page";
-import { startPremiumAttempt } from "@/lib/start-premium-attempt";
-import { getUserFacingError } from "@/lib/user-facing-error";
 import { DevPreviewBanner } from "./dev-preview-banner";
 import { PremiumShareSavePreview } from "./premium-share-save-preview";
 import {
@@ -22,7 +20,6 @@ export function ResultExperience({ result, devPreview = false }: { result: Store
   const [analysisStep, setAnalysisStep] = useState(4);
   const [revealing, setRevealing] = useState(false);
   const [actionMessage, setActionMessage] = useState("");
-  const [retestBusy, setRetestBusy] = useState(false);
   const [shareCardImageUrl, setShareCardImageUrl] = useState("");
   const cardBlobRef = useRef<Blob | null>(null);
   const previewUrlRef = useRef("");
@@ -126,26 +123,8 @@ export function ResultExperience({ result, devPreview = false }: { result: Store
     catch { setActionMessage("复制失败，请长按文字手动复制。 "); }
   }
 
-  async function retest() {
-    if (devPreview) {
-      router.push("/dev/premium-preview/test");
-      return;
-    }
-
-    setRetestBusy(true);
-    setActionMessage("正在准备新的测试……");
-    try {
-      await startPremiumAttempt();
-      router.push("/premium/test");
-    } catch (cause) {
-      setActionMessage(getUserFacingError(cause, "暂时无法开始测试，请稍后再试。"));
-    } finally {
-      setRetestBusy(false);
-    }
-  }
-
   if (!personality) return <main className="app-shell analysis-page"><p className="eyebrow">正在寻找你的人格档案……</p></main>;
   if (revealing) return <>{devPreview && <DevPreviewBanner />}<ResultReveal step={analysisStep} /></>;
 
-  return <>{devPreview && <DevPreviewBanner />}<ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} retestBusy={retestBusy} onSave={saveCard} onCopy={copyShareText} onRetest={retest} onHome={() => router.push(devPreview ? "/dev/premium-preview" : "/premium")} /><PremiumShareSavePreview imageUrl={shareCardImageUrl} personalityName={personality.name} onClose={closeShareCardPreview} onLoad={() => setActionMessage("图片已生成，请长按保存到相册。")} onError={() => { closeShareCardPreview(); setActionMessage("人格卡图片显示失败，请稍后再试。"); }} /></>;
+  return <>{devPreview && <DevPreviewBanner />}<ResultDetailPage personality={personality} result={result} actionMessage={actionMessage} onSave={saveCard} onCopy={copyShareText} onHome={() => router.push(devPreview ? "/dev/premium-preview" : "/premium")} /><PremiumShareSavePreview imageUrl={shareCardImageUrl} personalityName={personality.name} onClose={closeShareCardPreview} onLoad={() => setActionMessage("图片已生成，请长按保存到相册。")} onError={() => { closeShareCardPreview(); setActionMessage("人格卡图片显示失败，请稍后再试。"); }} /></>;
 }
